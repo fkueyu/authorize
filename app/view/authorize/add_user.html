@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Authorize 添加账号</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="/static/layui/css/layui.css">
+  <link rel="stylesheet" href="/static/css/font.css">
+</head>
+
+<body>
+  <br>
+  <form class="layui-form" id="user" action="">
+    <div class="layui-form-item">
+      <label class="layui-form-label">角色</label>
+      <div class="layui-input-block" style="width: 320px;">
+        <select name="group" id="group" lay-filter="group" lay-verify="required">
+          <option value="">请选择</option>
+        </select>
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">姓名</label>
+      <div class="layui-input-block">
+        <input type="name" name="name" lay-verify="required" style="width: 320px;" autocomplete="off"
+          class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">账号</label>
+      <div class="layui-input-block">
+        <input type="username" name="username" lay-verify="required" style="width: 320px;" autocomplete="off"
+          class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">邮箱</label>
+      <div class="layui-input-block">
+        <input type="text" name="email" lay-verify="email" style="width: 320px;" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">手机</label>
+      <div class="layui-input-block">
+        <input type="tel" name="tel" lay-verify="required|phone" style="width: 320px;" autocomplete="off"
+          class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">部门</label>
+      <div class="layui-input-block">
+        <input type="department" name="department" style="width: 320px;" lay-verify="required" autocomplete="off"
+          class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">职位</label>
+      <div class="layui-input-block">
+        <input type="position" name="position" style="width: 320px;" lay-verify="required" autocomplete="off"
+          class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">密码</label>
+      <div class="layui-input-block">
+        <input type="password" name="password" style="width: 320px;" lay-verify="pass" placeholder="请填写6到12位密码"
+          autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <div class="layui-input-block">
+        <button class="layui-btn" lay-submit="" style="width: 120px;" lay-filter="submit">
+          <i title="提交" class="iconfont">&#xe605;</i> 提交</button>
+        <button id="reset" type="reset" style="width: 120px;" class="layui-btn layui-btn-primary">
+          <i title="重置" class="iconfont">&#x1006;</i> 重置</button>
+      </div>
+    </div>
+  </form>
+  <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="/static/layui/layui.js" charset="utf-8"></script>
+  <script src="/static/js/authorize/add_user.js?{:time()}" charset="utf-8"></script>
+</body>
+
+</html>

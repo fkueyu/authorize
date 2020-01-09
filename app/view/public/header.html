@@ -1,0 +1,85 @@
+<?php
+use think\auth\Auth;
+$auth = Auth::instance();
+?>
+<div class="layui-header">
+  <div class="layui-logo" style="color:#e2e2e2; font-size:25px">Authorize</div>
+  <!-- 头部区域（可配合layui已有的水平导航） -->
+  {if($Request.session.intensity == 0)}
+  <ul class="layui-nav layui-layout-left">
+    <li class="layui-nav-item">
+      <i onclick="State();" title="关闭左侧栏" class="iconfont">&#xe671;</i>
+    </li>
+    {if($auth->check('header_index',$Request.session.id))}
+    <li class="layui-nav-item [index]">
+      <a href="/index">总览</a>
+    </li>
+    {/if}
+  </ul>
+  {/if}
+  <ul class="layui-nav layui-layout-right">
+    <li class="layui-nav-item">
+      <a href="javascript:;">
+        <img src="/static/images/user.png" class="layui-nav-img"> {$Request.session.user}
+      </a>
+      <dl class="layui-nav-child">
+        <dd>
+          <a href="/authorize/personal">
+            <i class="iconfont">&#xe612;</i>&nbsp;&nbsp;个人信息</a>
+        </dd> {if($auth->check('sql', $Request.session.id))}
+        <dd>
+          <a href="/common/sql" target="_blank">
+            <i class="iconfont">&#xe62e;</i>&nbsp;&nbsp;数据字典</a>
+        </dd>
+        {/if}
+      </dl>
+    </li>
+    <li class="layui-nav-item">
+      <a href="javascript:;" onclick="LogOut();">退出</a>
+    </li>
+    <li class="layui-nav-item">
+      <a href="mailto:fkueyu@gmail.com">问题反馈</a>
+    </li>
+  </ul>
+</div>
+<script>
+  function State() {
+    if ($('.layui-side').css('left') == '0px') {
+      $('.layui-side').animate({
+        left: '-200px'
+      }, 100);
+      $('.layui-body').animate({
+        left: '0px'
+      }, 100);
+      $('.layui-footer').animate({
+        left: '0px'
+      }, 0);
+    } else {
+      $('.layui-side').animate({
+        left: '0px'
+      }, 100);
+      $('.layui-body').animate({
+        left: '200px'
+      }, 100);
+      $('.layui-footer').animate({
+        left: '200px'
+      }, 0);
+    }
+  }
+  function LogOut() {
+    var e = layer.load(2, { shade: [0.2, '#2F4056'] });
+    $.post("/index/logOut", function (data) {
+      if (data.code == 0) {
+        layer.close(e);
+        layer.msg(data.msg
+          , { time: 2000 }
+          , function () {
+            location.reload();
+          });
+      } else {
+        layer.close(e);
+        layer.msg(data.msg, { time: 2000 });
+      }
+    });
+  }
+</script>

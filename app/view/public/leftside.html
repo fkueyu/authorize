@@ -1,0 +1,34 @@
+{if($Request.session.intensity == 0)}
+<div class="layui-side layui-bg-black" style="left: 0px;">
+  <div class="layui-side-scroll">
+    <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+    <ul class="layui-nav layui-nav-tree" lay-filter="test">
+      {if($auth->check('user', $Request.session.id))}
+      <li class="layui-nav-item [usermenu]">
+        <a class="" href="javascript:;">
+          <i class="iconfont">&#xe672;</i>&nbsp;&nbsp;权限管理</a>
+        <dl class="layui-nav-child">
+          {if($auth->check('user_list', $Request.session.id))}
+          <dd class="[userlist]">
+            <a href="/authorize/user">&nbsp;&nbsp;
+              <i class="iconfont">&#xe770;</i>&nbsp;&nbsp;用户管理</a>
+          </dd>
+          {/if} {if($auth->check('group_list', $Request.session.id))}
+          <dd class="[grouplist]">
+            <a href="/authorize/group">&nbsp;&nbsp;
+              <i class="iconfont">&#xe66f;</i>&nbsp;&nbsp;角色管理</a>
+          </dd>
+          {/if} {if($auth->check('menu_list', $Request.session.id))}
+          <dd class="[menulist]">
+            <a href="/authorize/rules">&nbsp;&nbsp;
+              <i class="iconfont">&#xe64e;</i>&nbsp;&nbsp;规则管理</a>
+          </dd>
+          {/if}
+        </dl>
+      </li>
+      {/if}
+    </ul>
+  </div>
+</div>
+<div class="layui-body" style="left: 200px;">
+  {/if}
