@@ -94,7 +94,7 @@ class Authorize
       $user = [
         'name' => input('name'),
         'username' => input('username'),
-        'password' => password_hash(input('password'), PASSWORD_ARGON2I),
+        'password_hash' => password_hash(input('password'), PASSWORD_ARGON2I),
         'email' => input('email'),
         'tel' => input('tel'),
         'position' => input('position'),
