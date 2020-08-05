@@ -39,7 +39,7 @@ class Index
   {
     $username =  Session::get('username');
     if ('' != $username) {
-      $log_data = ['userid' => $username, 'operation' => 'logout', 'login_city' => ''];
+      $log_data = ['userid' => $username, 'operation' => 'logout', 'create_time' => date('Y-m-d H:i:s'), 'login_city' => ''];
       $Log = new Log;
       $Log->saveLog($log_data);
     }

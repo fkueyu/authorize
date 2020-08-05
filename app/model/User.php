@@ -13,12 +13,11 @@ class User extends Model
     $user = User::where('username', $username)->find();
     if (password_verify($password, $user->password_hash)) {
       $this->assistant = new \mylib\Assistant();
-      $time = date('Y-m-d H:i:s');
       Session::set('id', $user->getAttr('id'));
       Session::set('user', $user->getAttr('name'));
       Session::set('username', $user->getAttr('username'));
       Session::set('tel', $user->getAttr('tel'));
-      $log_data = ['userid' => $user->getAttr('username'), 'operation' => 'login', 'create_time' => $time];
+      $log_data = ['userid' => $user->getAttr('username'), 'operation' => 'login', 'create_time' => date('Y-m-d H:i:s'), 'login_city' => ''];
       $Log = new Log;
       $Log->saveLog($log_data);
       $intensity = $this->assistant->checkPassword(input('password'));
