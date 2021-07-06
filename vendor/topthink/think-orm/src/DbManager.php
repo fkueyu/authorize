@@ -92,8 +92,6 @@ class DbManager
      */
     protected function modelMaker()
     {
-        $this->triggerSql();
-
         Model::setDb($this);
 
         if (is_object($this->event)) {
@@ -122,26 +120,8 @@ class DbManager
      * @access protected
      * @return void
      */
-    protected function triggerSql(): void
-    {
-        // 监听SQL
-        $this->listen(function ($sql, $time, $master) {
-            if (0 === strpos($sql, 'CONNECT:')) {
-                $this->log($sql);
-                return;
-            }
-
-            // 记录SQL
-            if (is_bool($master)) {
-                // 分布式记录当前操作的主从
-                $master = $master ? 'master|' : 'slave|';
-            } else {
-                $master = '';
-            }
-
-            $this->log($sql . ' [ ' . $master . 'RunTime:' . $time . 's ]');
-        });
-    }
+    public function triggerSql(): void
+    {}
 
     /**
      * 初始化配置参数
@@ -229,21 +209,11 @@ class DbManager
      * @access public
      * @param string|null $name  连接配置标识
      * @param bool        $force 强制重新连接
-     * @return BaseQuery
+     * @return ConnectionInterface
      */
-    public function connect(string $name = null, bool $force = false): BaseQuery
+    public function connect(string $name = null, bool $force = false)
     {
-        $connection = $this->instance($name, $force);
-
-        $class = $connection->getQueryClass();
-        $query = new $class($connection);
-
-        $timeRule = $this->getConfig('time_query_rule');
-        if (!empty($timeRule)) {
-            $query->timeRule($timeRule);
-        }
-
-        return $query;
+        return $this->instance($name, $force);
     }
 
     /**

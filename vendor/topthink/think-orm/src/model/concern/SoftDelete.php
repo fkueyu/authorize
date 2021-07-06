@@ -13,9 +13,11 @@ declare (strict_types = 1);
 namespace think\model\concern;
 
 use think\db\BaseQuery as Query;
+use think\Model;
 
 /**
  * 数据软删除
+ * @mixin Model
  */
 trait SoftDelete
 {
@@ -105,9 +107,10 @@ trait SoftDelete
             return false;
         }
 
-        $name = $this->getDeleteTimeField();
+        $name  = $this->getDeleteTimeField();
+        $force = $this->isForce();
 
-        if ($name && !$this->isForce()) {
+        if ($name && !$force) {
             // 软删除
             $this->set($name, $this->autoWriteTimestamp($name));
 
@@ -129,7 +132,7 @@ trait SoftDelete
 
         // 关联删除
         if (!empty($this->relationWrite)) {
-            $this->autoRelationDelete();
+            $this->autoRelationDelete($force);
         }
 
         $this->trigger('AfterDelete');
@@ -149,7 +152,7 @@ trait SoftDelete
     public static function destroy($data, bool $force = false): bool
     {
         // 包含软删除数据
-        $query = (new static())->db(false);
+        $query = (new static())->withTrashedData(true)->db(false);
 
         if (is_array($data) && key($data) !== 0) {
             $query->where($data);

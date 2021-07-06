@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2021 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -145,7 +145,10 @@ class Controller extends Dispatch
                 }
 
                 if (is_string($val) && strpos($val, ':')) {
-                    $val = explode(':', $val, 2);
+                    $val = explode(':', $val);
+                    if (count($val) > 1) {
+                        $val = [$val[0], array_slice($val, 1)];
+                    }
                 }
 
                 $this->app->middleware->controller($val);
