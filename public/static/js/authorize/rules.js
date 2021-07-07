@@ -3,7 +3,7 @@ layui.config({
   base: '/static/js/',
 })
 var treeTable, re, form;
-layui.use(['element', 'treeTable', 'layer', 'code', 'form'], function () {
+layui.define(function () {
   treeTable = layui.treeTable;
   var o = layui.$,
     form = layui.form,

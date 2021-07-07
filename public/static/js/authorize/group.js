@@ -1,5 +1,5 @@
 var from, tree, layer, util;
-layui.use(['element', 'layer', 'table', 'form', 'tree'], function () {
+layui.define(function () {
   form = layui.form
     , layer = layui.layer
     , util = layui.util

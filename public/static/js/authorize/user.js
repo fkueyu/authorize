@@ -9,7 +9,7 @@ function addUser() {
   });
 }
 var from;
-layui.use(['element', 'form', 'layer', 'table'], function () {
+layui.define(function () {
   form = layui.form;
   var element = layui.element
     , table = layui.table
