@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>authorize 登录</title>
+  <title>Authorize 登录</title>
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="/static/css/radmin.css">
   <script src="/static/layui/layui.js" charset="utf-8"></script>
@@ -13,7 +13,7 @@
 
 <body class="login-bg">
   <div class="login">
-    <div class="message">authorize 后台</div>
+    <div class="message">Authorize 后台登陆</div>
     <div id="darkbannerwrap"></div>
     <form id="user" class="layui-form">
       <input name="username" placeholder="用户名" type="text" lay-verify="required" class="layui-input">
@@ -35,8 +35,8 @@
       var e = layer.load(2, { shade: [0.2, '#2F4056'] });
       ev.preventDefault();
       $.post("/index/login", $("#user").serialize(), function (data) {
+        layer.close(e);
         if (data.code == 0) {
-          layer.close(e);
           layer.msg(data.msg
             , { time: 3000 }
             , function () {
@@ -44,14 +44,11 @@
             });
         } else {
           $("#password").val('');
-          layer.close(e);
           layer.msg(data.msg, { time: 3000 });
         }
       });
     });
-
   </script>
-  <!-- 底部结束 -->
 </body>
 
 </html>

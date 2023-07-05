@@ -40,7 +40,8 @@ DocumentRoot "D:/xampp7/htdocs/authorize/public"
 <Directory "D:/xampp7/htdocs/authorize/public">
 5. 启动mysql数据库服务，参考ThinkPHP6官方手册配置数据库连接（[https://www.kancloud.cn/manual/thinkphp6_0/1037531](https://www.kancloud.cn/manual/thinkphp6_0/1037531) ）
 6. 手动创建数据库，名称为fr_lab，字符集：utf8，排序规则：utf8_general_ci，导入sql文件fr_lab.sql，位于public目录
-7. 启动apache服务即可访问（管理员账号：admin，密码：123456,若无法登陆，在代码中注释掉登陆验证后修改一次密码即可）
+7. 修改根目录.example.env为.env并在其中配置数据库连接。
+8. 启动apache服务即可访问（管理员账号：admin，密码：123456,若无法登陆，在代码中注释掉登陆验证后修改一次密码即可）
 
 #### 使用说明
 

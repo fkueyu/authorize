@@ -12,8 +12,7 @@ class User extends Model
   {
     $user = User::where('username', $username)->find();
     if (empty($user)) {
-      $result = ['code' => -1, 'data' => '', 'msg' => '账号不存在,请重试'];
-      return $result;
+      return ['code' => -1, 'data' => '', 'msg' => '账号不存在,请重试'];
     }
     if (password_verify($password, $user->password_hash)) {
       $this->assistant = new \mylib\Assistant();

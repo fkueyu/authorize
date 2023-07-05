@@ -3,7 +3,7 @@
 namespace app\controller;
 
 use app\BaseController;
-use think\facade\{Session, View, Request};
+use think\facade\{Session, View};
 use app\model\{User, Log};
 
 class Index extends BaseController
@@ -19,8 +19,8 @@ class Index extends BaseController
   }
   public function login()
   {
-    $username = Request::param('username');
-    $password = Request::param('password');
+    $username = $this->request->param('username');
+    $password = $this->request->param('password');
     if ('' != $username || '' != Session::get('user')) {
       if (Session::get('user')) {
         $this->redirect('index');
