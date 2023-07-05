@@ -2,13 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think;
 
@@ -102,7 +102,7 @@ abstract class Response
      */
     public static function create($data = '', string $type = 'html', int $code = 200): Response
     {
-        $class = false !== strpos($type, '\\') ? $type : '\\think\\response\\' . ucfirst(strtolower($type));
+        $class = str_contains($type, '\\') ? $type : '\\think\\response\\' . ucfirst(strtolower($type));
 
         return Container::getInstance()->invokeClass($class, [$data, $code]);
     }
@@ -130,16 +130,19 @@ abstract class Response
         // 处理输出数据
         $data = $this->getContent();
 
-        if (!headers_sent() && !empty($this->header)) {
-            // 发送状态码
-            http_response_code($this->code);
-            // 发送头部信息
-            foreach ($this->header as $name => $val) {
-                header($name . (!is_null($val) ? ':' . $val : ''));
+        if (!headers_sent()) {
+            if (!empty($this->header)) {
+                // 发送状态码
+                http_response_code($this->code);
+                // 发送头部信息
+                foreach ($this->header as $name => $val) {
+                    header($name . (!is_null($val) ? ':' . $val : ''));
+                }
             }
-        }
-        if ($this->cookie) {
-            $this->cookie->save();
+
+            if ($this->cookie) {
+                $this->cookie->save();
+            }
         }
 
         $this->sendData($data);
@@ -214,7 +217,7 @@ abstract class Response
     /**
      * 是否允许请求缓存
      * @access public
-     * @return $this
+     * @return bool
      */
     public function isAllowCache()
     {
@@ -257,10 +260,11 @@ abstract class Response
      */
     public function content($content)
     {
-        if (null !== $content && !is_string($content) && !is_numeric($content) && !is_callable([
-            $content,
-            '__toString',
-        ])
+        if (
+            null !== $content && !is_string($content) && !is_numeric($content) && !is_callable([
+                $content,
+                '__toString',
+            ])
         ) {
             throw new \InvalidArgumentException(sprintf('variable type error： %s', gettype($content)));
         }
@@ -384,10 +388,11 @@ abstract class Response
         if (null == $this->content) {
             $content = $this->output($this->data);
 
-            if (null !== $content && !is_string($content) && !is_numeric($content) && !is_callable([
-                $content,
-                '__toString',
-            ])
+            if (
+                null !== $content && !is_string($content) && !is_numeric($content) && !is_callable([
+                    $content,
+                    '__toString',
+                ])
             ) {
                 throw new \InvalidArgumentException(sprintf('variable type error： %s', gettype($content)));
             }

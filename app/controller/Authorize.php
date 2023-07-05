@@ -335,11 +335,10 @@ class Authorize
       return json($AuthGroupAccess->updateGroupUser($id, $users));
     }
   }
-
   /**
    * 读取规则
    * @access public
-   * @param int $id 规则id
+   * @param int id 规则id
    * @return json
    */
   public function getRules()
@@ -348,6 +347,21 @@ class Authorize
     if ($this->auth->check('menu_list', Session::get('id'))) {
       $AuthRule = new AuthRule;
       return json($AuthRule->getRules($id));
+    }
+  }
+
+  /**
+   * 读取子规则
+   * @access public
+   * @param int $pid 父规则id
+   * @return json
+   */
+  public function getSubRules()
+  {
+    $pid = Request::param('pid');
+    if ($this->auth->check('menu_list', Session::get('id'))) {
+      $AuthRule = new AuthRule;
+      return json($AuthRule->getSubRules($pid));
     }
   }
 
@@ -369,7 +383,6 @@ class Authorize
       return $AuthRule->updateRulesState($id, $field, $value) ? '更新成功' : '更新失败';
     }
   }
-
   /**
    * 删除规则
    * @access public
@@ -379,9 +392,10 @@ class Authorize
   public function delRules()
   {
     $id = Request::param('id');
+    $pid = Request::param('pid');
     if ($this->auth->check('menu_list', Session::get('id'))) {
       $AuthRule = new AuthRule;
-      return json($AuthRule->delRules($id));
+      return json($AuthRule->delRules($id,$pid));
     }
   }
 

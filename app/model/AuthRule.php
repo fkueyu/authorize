@@ -6,7 +6,7 @@ use think\Model;
 
 class AuthRule extends Model
 {
-  /**
+    /**
    * 读取规则
    * @access public
    * @param int $id 规则id
@@ -14,18 +14,28 @@ class AuthRule extends Model
    */
   public function getRules($id)
   {
-    if ('' == $id) {
-      $result = AuthRule::field('id,title as name,pid,navid,name as title,type,status,condition,remarks')
+
+    $result = AuthRule::find($id)->toArray();
+    $count = count($result);
+    return ['code' => 0, 'count' => $count, 'data' =>$result];
+  }
+
+  /**
+   * 读取子规则
+   * @access public
+   * @param int $pid 父规则id
+   * @return json
+   */
+  public function getSubRules($pid)
+  {
+    if(empty($pid)) $pid = 0;
+    $result = AuthRule::field('id,title as name,pid,navid,name as title,type,status,condition,remarks,isParent')
+        ->where('pid', $pid)
         ->order('navid')
         ->select()
         ->toArray();
-    } else {
-      //修改规则的二次读取
-      $result = AuthRule::where('id', $id)->field('id,title as name,pid,navid,name as title,type,status,condition,remarks')
-        ->select()
-        ->toArray();
-    }
-    return $result;
+    $count = count($result);
+    return ['code' => 0, 'count' => $count, 'data' =>$result];
   }
 
   /**
@@ -50,9 +60,9 @@ class AuthRule extends Model
    * @param int $id 规则id
    * @return string
    */
-  public function delRules($id)
+  public function delRules($id,$pid)
   {
-    if (1 === $id) {
+    if (1 == $id) {
       $result = ['code' => -1, 'msg' => '根节点禁止删除'];
     } else {
       $children = AuthRule::where('pid', $id)->count();
@@ -60,13 +70,20 @@ class AuthRule extends Model
         $result = ['code' => -2, 'msg' => '此节点存在子规则，需先删除子规则'];
       } else {
         if ($this->where('id', $id)->delete()) {
+          //查看是否还有同级子节点，若无修改父节点isParent为null
+          $brothers = AuthRule::where('pid', $pid)->count();
+          if($brothers == 0){
+            $AuthRule = AuthRule::find($pid);
+            $AuthRule->setAttr('isParent', null);
+            $AuthRule->save();
+          }
           $result = ['code' => 0, 'msg' => '删除成功'];
         } else {
           $result = ['code' => -3, 'msg' => '规则不存在'];
         }
       }
-      return $result;
     }
+    return $result;
   }
 
   /**
@@ -83,8 +100,11 @@ class AuthRule extends Model
       if ($row) {
         $result = ['code' => -2, 'msg' => '添加失败，名称或控制器已存在'];
       } else {
-        $this->create($rules);
-        $result = ['code' => 0, 'msg' => '规则[ ' . $rules['title'] . ' ]添加成功'];
+        $AuthRule = AuthRule::find($rules['pid']);
+        $AuthRule->setAttr('isParent', 'true');
+        $AuthRule->save();
+        $rules = $this->create($rules);
+        $result = ['code' => 0, 'data' => $rules->id,'msg' => '规则[ ' . $rules->title . ' ]添加成功'];
       }
     }
     return $result;

@@ -2,16 +2,18 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think;
 
+use ArrayAccess;
+use think\facade\Lang;
 use think\file\UploadedFile;
 use think\route\Rule;
 
@@ -19,7 +21,7 @@ use think\route\Rule;
  * 请求管理类
  * @package think
  */
-class Request
+class Request implements ArrayAccess
 {
     /**
      * 兼容PATH_INFO获取
@@ -313,7 +315,7 @@ class Request
             $header = [];
             $server = $_SERVER;
             foreach ($server as $key => $val) {
-                if (0 === strpos($key, 'HTTP_')) {
+                if (str_starts_with($key, 'HTTP_')) {
                     $key          = str_replace('_', '-', strtolower(substr($key, 5)));
                     $header[$key] = $val;
                 }
@@ -407,7 +409,8 @@ class Request
             $rootDomain = $this->rootDomain();
 
             if ($rootDomain) {
-                $this->subDomain = rtrim(stristr($this->host(), $rootDomain, true), '.');
+                $sub             = stristr($this->host(), $rootDomain, true);
+                $this->subDomain = $sub ? rtrim($sub, '.') : '';
             } else {
                 $this->subDomain = '';
             }
@@ -497,7 +500,7 @@ class Request
     {
         if (!$this->baseUrl) {
             $str           = $this->url();
-            $this->baseUrl = strpos($str, '?') ? strstr($str, '?', true) : $str;
+            $this->baseUrl = str_contains($str, '?') ? strstr($str, '?', true) : $str;
         }
 
         return $complete ? $this->domain() . $this->baseUrl : $this->baseUrl;
@@ -523,7 +526,7 @@ class Request
                     $url = $this->server('ORIG_SCRIPT_NAME');
                 } elseif (($pos = strpos($this->server('PHP_SELF'), '/' . $script_name)) !== false) {
                     $url = substr($this->server('SCRIPT_NAME'), 0, $pos) . '/' . $script_name;
-                } elseif ($this->server('DOCUMENT_ROOT') && strpos($this->server('SCRIPT_FILENAME'), $this->server('DOCUMENT_ROOT')) === 0) {
+                } elseif ($this->server('DOCUMENT_ROOT') && str_starts_with($this->server('SCRIPT_FILENAME'), $this->server('DOCUMENT_ROOT'))) {
                     $url = str_replace('\\', '/', str_replace($this->server('DOCUMENT_ROOT'), '', $this->server('SCRIPT_FILENAME')));
                 }
             }
@@ -555,7 +558,7 @@ class Request
     {
         if (!$this->root) {
             $file = $this->baseFile();
-            if ($file && 0 !== strpos($this->url(), $file)) {
+            if ($file && !str_starts_with($this->url(), $file)) {
                 $file = str_replace('\\', '/', dirname($file));
             }
             $this->root = rtrim($file, '/');
@@ -572,7 +575,7 @@ class Request
     public function rootUrl(): string
     {
         $base = $this->root();
-        $root = strpos($base, '.') ? ltrim(dirname($base), DIRECTORY_SEPARATOR) : $base;
+        $root = str_contains($base, '.') ? ltrim(dirname($base), DIRECTORY_SEPARATOR) : $base;
 
         if ('' != $root) {
             $root = '/' . ltrim($root, '/');
@@ -608,16 +611,16 @@ class Request
                 unset($this->get[$this->varPathinfo]);
             } elseif ($this->server('PATH_INFO')) {
                 $pathinfo = $this->server('PATH_INFO');
-            } elseif (false !== strpos(PHP_SAPI, 'cli')) {
-                $pathinfo = strpos($this->server('REQUEST_URI'), '?') ? strstr($this->server('REQUEST_URI'), '?', true) : $this->server('REQUEST_URI');
+            } elseif (str_contains(PHP_SAPI, 'cli')) {
+                $pathinfo = str_contains($this->server('REQUEST_URI'), '?') ? strstr($this->server('REQUEST_URI'), '?', true) : $this->server('REQUEST_URI');
             }
 
             // 分析PATHINFO信息
             if (!isset($pathinfo)) {
                 foreach ($this->pathinfoFetch as $type) {
                     if ($this->server($type)) {
-                        $pathinfo = (0 === strpos($this->server($type), $this->server('SCRIPT_NAME'))) ?
-                        substr($this->server($type), strlen($this->server('SCRIPT_NAME'))) : $this->server($type);
+                        $pathinfo = str_starts_with($this->server($type), $this->server('SCRIPT_NAME')) ?
+                            substr($this->server($type), strlen($this->server('SCRIPT_NAME'))) : $this->server($type);
                         break;
                     }
                 }
@@ -825,7 +828,7 @@ class Request
      */
     public function isCgi(): bool
     {
-        return strpos(PHP_SAPI, 'cgi') === 0;
+        return str_starts_with(PHP_SAPI, 'cgi');
     }
 
     /**
@@ -842,18 +845,11 @@ class Request
             $method = $this->method(true);
 
             // 自动获取请求变量
-            switch ($method) {
-                case 'POST':
-                    $vars = $this->post(false);
-                    break;
-                case 'PUT':
-                case 'DELETE':
-                case 'PATCH':
-                    $vars = $this->put(false);
-                    break;
-                default:
-                    $vars = [];
-            }
+            $vars   =   match ($method) {
+                'POST'  =>  $this->post(false),
+                'PUT','DELETE','PATCH'  =>  $this->put(false),
+                default =>  [],
+            };
 
             // 当前请求参数和URL地址中的参数合并
             $this->param = array_merge($this->param, $this->get(false), $vars, $this->route(false));
@@ -866,6 +862,26 @@ class Request
         }
 
         return $this->input($this->param, $name, $default, $filter);
+    }
+
+    /**
+     * 获取包含文件在内的请求参数
+     * @access public
+     * @param  string|array $name 变量名
+     * @param  string|array $filter 过滤方法
+     * @return mixed
+     */
+    public function all(string|array $name = '', string|array $filter = '')
+    {
+        $data = array_merge($this->param(), $this->file() ?: []);
+
+        if (is_array($name)) {
+            $data = $this->only($name, $data, $filter);
+        } elseif ($name) {
+            $data = $data[$name] ?? null;
+        }
+
+        return $data;
     }
 
     /**
@@ -898,19 +914,20 @@ class Request
      */
     public function setRoute(array $route)
     {
-        $this->route = array_merge($this->route, $route);
+        $this->route      = array_merge($this->route, $route);
+        $this->mergeParam = false;
         return $this;
     }
 
     /**
      * 获取路由参数
      * @access public
-     * @param  string|array $name 变量名
+     * @param  string|array|bool $name 变量名
      * @param  mixed        $default 默认值
      * @param  string|array $filter 过滤方法
      * @return mixed
      */
-    public function route($name = '', $default = null, $filter = '')
+    public function route(string|array|bool $name = '', $default = null, string|array $filter = '')
     {
         if (is_array($name)) {
             return $this->only($name, $this->route, $filter);
@@ -922,12 +939,12 @@ class Request
     /**
      * 获取GET参数
      * @access public
-     * @param  string|array $name 变量名
+     * @param  string|array|bool $name 变量名
      * @param  mixed        $default 默认值
      * @param  string|array $filter 过滤方法
      * @return mixed
      */
-    public function get($name = '', $default = null, $filter = '')
+    public function get(string|array|bool $name = '', $default = null, string|array $filter = '')
     {
         if (is_array($name)) {
             return $this->only($name, $this->get, $filter);
@@ -939,11 +956,11 @@ class Request
     /**
      * 获取中间件传递的参数
      * @access public
-     * @param  mixed $name 变量名
+     * @param  string $name 变量名
      * @param  mixed $default 默认值
      * @return mixed
      */
-    public function middleware($name, $default = null)
+    public function middleware(string $name, $default = null)
     {
         return $this->middleware[$name] ?? $default;
     }
@@ -951,12 +968,12 @@ class Request
     /**
      * 获取POST参数
      * @access public
-     * @param  string|array $name 变量名
+     * @param  bool|string|array $name 变量名
      * @param  mixed        $default 默认值
      * @param  string|array $filter 过滤方法
      * @return mixed
      */
-    public function post($name = '', $default = null, $filter = '')
+    public function post(string|array|bool $name = '', $default = null, string|array $filter = '')
     {
         if (is_array($name)) {
             return $this->only($name, $this->post, $filter);
@@ -968,12 +985,12 @@ class Request
     /**
      * 获取PUT参数
      * @access public
-     * @param  string|array $name 变量名
+     * @param  string|array|bool $name 变量名
      * @param  mixed        $default 默认值
      * @param  string|array $filter 过滤方法
      * @return mixed
      */
-    public function put($name = '', $default = null, $filter = '')
+    public function put(string|array|bool $name = '', $default = null, string|array $filter = '')
     {
         if (is_array($name)) {
             return $this->only($name, $this->put, $filter);
@@ -982,13 +999,13 @@ class Request
         return $this->input($this->put, $name, $default, $filter);
     }
 
-    protected function getInputData($content): array
+    protected function getInputData(string $content): array
     {
         $contentType = $this->contentType();
-        if ($contentType == 'application/x-www-form-urlencoded') {
+        if ('application/x-www-form-urlencoded' == $contentType) {
             parse_str($content, $data);
             return $data;
-        } elseif (false !== strpos($contentType, 'json')) {
+        } elseif (str_contains($contentType, 'json')) {
             return (array) json_decode($content, true);
         }
 
@@ -1003,7 +1020,7 @@ class Request
      * @param  string|array $filter 过滤方法
      * @return mixed
      */
-    public function delete($name = '', $default = null, $filter = '')
+    public function delete(string|array|bool $name = '', $default = null, string|array $filter = '')
     {
         return $this->put($name, $default, $filter);
     }
@@ -1016,7 +1033,7 @@ class Request
      * @param  string|array $filter 过滤方法
      * @return mixed
      */
-    public function patch($name = '', $default = null, $filter = '')
+    public function patch(string|array|bool $name = '', $default = null, string|array $filter = '')
     {
         return $this->put($name, $default, $filter);
     }
@@ -1029,7 +1046,7 @@ class Request
      * @param  string|array $filter 过滤方法
      * @return mixed
      */
-    public function request($name = '', $default = null, $filter = '')
+    public function request(string|array|bool $name = '', $default = null, string|array $filter = '')
     {
         if (is_array($name)) {
             return $this->only($name, $this->request, $filter);
@@ -1049,11 +1066,8 @@ class Request
     {
         if (empty($name)) {
             return $this->env->get();
-        } else {
-            $name = strtoupper($name);
         }
-
-        return $this->env->get($name, $default);
+        return $this->env->get(strtoupper($name), $default);
     }
 
     /**
@@ -1110,11 +1124,8 @@ class Request
     {
         if (empty($name)) {
             return $this->server;
-        } else {
-            $name = strtoupper($name);
         }
-
-        return $this->server[$name] ?? $default;
+        return $this->server[strtoupper($name)] ?? $default;
     }
 
     /**
@@ -1127,8 +1138,7 @@ class Request
     {
         $files = $this->file;
         if (!empty($files)) {
-
-            if (strpos($name, '.')) {
+            if (str_contains($name, '.')) {
                 [$name, $sub] = explode('.', $name);
             }
 
@@ -1205,7 +1215,7 @@ class Request
             7 => 'file write error',
         ];
 
-        $msg = $fileUploadErrors[$error];
+        $msg = Lang::get($fileUploadErrors[$error]);
         throw new Exception($msg, $error);
     }
 
@@ -1214,7 +1224,7 @@ class Request
      * @access public
      * @param  string $name header名称
      * @param  string $default 默认值
-     * @return string|array
+     * @return string|array|null
      */
     public function header(string $name = '', string $default = null)
     {
@@ -1223,7 +1233,6 @@ class Request
         }
 
         $name = str_replace('_', '-', strtolower($name));
-
         return $this->header[$name] ?? $default;
     }
 
@@ -1236,7 +1245,7 @@ class Request
      * @param  string|array $filter 过滤函数
      * @return mixed
      */
-    public function input(array $data = [], $name = '', $default = null, $filter = '')
+    public function input(array $data = [], string|bool $name = '', $default = null, string|array $filter = '')
     {
         if (false === $name) {
             // 获取原始数据
@@ -1246,7 +1255,7 @@ class Request
         $name = (string) $name;
         if ('' != $name) {
             // 解析name
-            if (strpos($name, '/')) {
+            if (str_contains($name, '/')) {
                 [$name, $type] = explode('/', $name);
             }
 
@@ -1287,44 +1296,28 @@ class Request
 
     /**
      * 强制类型转换
-     * @access public
+     * @access protected
      * @param  mixed  $data
      * @param  string $type
      * @return mixed
      */
-    private function typeCast(&$data, string $type)
+    protected function typeCast(&$data, string $type)
     {
-        switch (strtolower($type)) {
-            // 数组
-            case 'a':
-                $data = (array) $data;
-                break;
-            // 数字
-            case 'd':
-                $data = (int) $data;
-                break;
-            // 浮点
-            case 'f':
-                $data = (float) $data;
-                break;
-            // 布尔
-            case 'b':
-                $data = (boolean) $data;
-                break;
-            // 字符串
-            case 's':
-                if (is_scalar($data)) {
-                    $data = (string) $data;
-                } else {
-                    throw new \InvalidArgumentException('variable type error：' . gettype($data));
-                }
-                break;
+        $type = strtolower($type);
+        if (in_array($type, ['a', 'b', 'd', 'f', 's'])) {
+            $data   =   match ($type) {
+                'a'     =>  (array) $data,  // 数组
+                'b'     =>  (bool) $data,   // 布尔
+                'd'     =>  (int) $data,    // 数字
+                'f'     =>  (float) $data,  // 浮点
+                's'     =>  is_scalar($data) ? (string) $data : throw new \InvalidArgumentException('variable type error：' . gettype($data)), //字符串
+            };
         }
     }
 
     /**
      * 获取数据
-     * @access public
+     * @access protected
      * @param  array  $data 数据源
      * @param  string $name 字段名
      * @param  mixed  $default 默认值
@@ -1366,7 +1359,7 @@ class Request
             $filter = [];
         } else {
             $filter = $filter ?: $this->filter;
-            if (is_string($filter) && false === strpos($filter, '/')) {
+            if (is_string($filter) && !str_contains($filter, '/')) {
                 $filter = explode(',', $filter);
             } else {
                 $filter = (array) $filter;
@@ -1393,9 +1386,13 @@ class Request
         foreach ($filters as $filter) {
             if (is_callable($filter)) {
                 // 调用函数或者方法过滤
+                if (is_null($value)) {
+                    continue;
+                }
+
                 $value = call_user_func($filter, $value);
             } elseif (is_scalar($value)) {
-                if (is_string($filter) && false !== strpos($filter, '/')) {
+                if (is_string($filter) && str_contains($filter, '/')) {
                     // 正则过滤
                     if (!preg_match($filter, $value)) {
                         // 匹配不成功返回默认值
@@ -1467,7 +1464,7 @@ class Request
             if (is_int($key)) {
                 $default = null;
                 $key     = $val;
-                if (!isset($data[$key])) {
+                if (!key_exists($key, $data)) {
                     continue;
                 }
             } else {
@@ -1531,7 +1528,7 @@ class Request
     {
         $acceptType = $this->type();
 
-        return false !== strpos($acceptType, 'json');
+        return str_contains($acceptType, 'json');
     }
 
     /**
@@ -1649,17 +1646,11 @@ class Request
      */
     public function isValidIP(string $ip, string $type = ''): bool
     {
-        switch (strtolower($type)) {
-            case 'ipv4':
-                $flag = FILTER_FLAG_IPV4;
-                break;
-            case 'ipv6':
-                $flag = FILTER_FLAG_IPV6;
-                break;
-            default:
-                $flag = null;
-                break;
-        }
+        $flag   =   match (strtolower($type)) {
+            'ipv4'  =>  FILTER_FLAG_IPV4,
+            'ipv6'  =>  FILTER_FLAG_IPV6,
+            default =>  0,
+        };
 
         return boolval(filter_var($ip, FILTER_VALIDATE_IP, $flag));
     }
@@ -1699,7 +1690,7 @@ class Request
     {
         if ($this->server('HTTP_VIA') && stristr($this->server('HTTP_VIA'), "wap")) {
             return true;
-        } elseif ($this->server('HTTP_ACCEPT') && strpos(strtoupper($this->server('HTTP_ACCEPT')), "VND.WAP.WML")) {
+        } elseif ($this->server('HTTP_ACCEPT') && str_contains(strtoupper($this->server('HTTP_ACCEPT')), "VND.WAP.WML")) {
             return true;
         } elseif ($this->server('HTTP_X_WAP_PROFILE') || $this->server('HTTP_PROFILE')) {
             return true;
@@ -1754,10 +1745,10 @@ class Request
         if ($this->host) {
             $host = $this->host;
         } else {
-            $host = strval($this->server('HTTP_X_REAL_HOST') ?: $this->server('HTTP_HOST'));
+            $host = strval($this->server('HTTP_X_FORWARDED_HOST') ?: $this->server('HTTP_HOST'));
         }
 
-        return true === $strict && strpos($host, ':') ? strstr($host, ':', true) : $host;
+        return true === $strict && str_contains($host, ':') ? strstr($host, ':', true) : $host;
     }
 
     /**
@@ -1767,7 +1758,7 @@ class Request
      */
     public function port(): int
     {
-        return (int) $this->server('SERVER_PORT', '');
+        return (int) ($this->server('HTTP_X_FORWARDED_PORT') ?: $this->server('SERVER_PORT', ''));
     }
 
     /**
@@ -1800,7 +1791,7 @@ class Request
         $contentType = $this->header('Content-Type');
 
         if ($contentType) {
-            if (strpos($contentType, ';')) {
+            if (str_contains($contentType, ';')) {
                 [$type] = explode(';', $contentType);
             } else {
                 $type = $contentType;
@@ -2125,5 +2116,24 @@ class Request
     public function __isset(string $name): bool
     {
         return isset($this->middleware[$name]);
+    }
+
+    // ArrayAccess
+    public function offsetExists(mixed $name): bool
+    {
+        return $this->has($name);
+    }
+
+    public function offsetGet(mixed $name): mixed
+    {
+        return $this->param($name);
+    }
+
+    public function offsetSet(mixed $name, mixed $value): void
+    {
+    }
+
+    public function offsetUnset(mixed $name): void
+    {
     }
 }

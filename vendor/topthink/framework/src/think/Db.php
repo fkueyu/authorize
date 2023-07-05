@@ -2,19 +2,20 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think;
 
 /**
  * 数据库管理类
  * @package think
+ * @property Config $config
  */
 class Db extends DbManager
 {
@@ -32,7 +33,9 @@ class Db extends DbManager
         $db->setConfig($config);
         $db->setEvent($event);
         $db->setLog($log);
-        $db->setCache($cache);
+
+        $store = $db->getConfig('cache_store');
+        $db->setCache($cache->store($store));
         $db->triggerSql();
 
         return $db;
@@ -43,7 +46,7 @@ class Db extends DbManager
      * @access public
      * @return void
      */
-    protected function modelMaker()
+    protected function modelMaker(): void
     {
     }
 

@@ -5,9 +5,6 @@ namespace think\tests;
 use Mockery as m;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
-use think\App;
-use think\Config;
-use think\Container;
 use think\Exception;
 use think\exception\Handle;
 use think\Middleware;
@@ -17,29 +14,19 @@ use think\Response;
 
 class MiddlewareTest extends TestCase
 {
-    /** @var App|MockInterface */
-    protected $app;
+    use InteractsWithApp;
 
     /** @var Middleware|MockInterface */
     protected $middleware;
-
-    /** @var Config|MockInterface */
-    protected $config;
 
     protected function tearDown(): void
     {
         m::close();
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->app = m::mock(App::class)->makePartial();
-        Container::setInstance($this->app);
-
-        $this->app->shouldReceive('make')->with(App::class)->andReturn($this->app);
-        $this->config = m::mock(Config::class)->makePartial();
-        $this->app->shouldReceive('get')->with('config')->andReturn($this->config);
-        $this->app->shouldReceive('runningInConsole')->andReturn(false);
+        $this->prepareApp();
 
         $this->middleware = new Middleware($this->app);
     }
@@ -60,7 +47,8 @@ class MiddlewareTest extends TestCase
         $this->assertEquals(2, count($this->middleware->all()));
         $this->assertEquals([['BazMiddleware', 'handle'], 'baz'], $this->middleware->all()[0]);
 
-        $this->config->shouldReceive('get')->with('middleware.alias', [])->andReturn(['foo' => ['FooMiddleware', 'FarMiddleware']]);
+        $this->config->shouldReceive('get')->with('middleware.alias', [])
+            ->andReturn(['foo' => ['FooMiddleware', 'FarMiddleware']]);
 
         $this->middleware->add('foo');
         $this->assertEquals(3, count($this->middleware->all()));
@@ -97,7 +85,8 @@ class MiddlewareTest extends TestCase
 
         $this->app->shouldReceive('make')->with(Handle::class)->andReturn($handle);
 
-        $this->config->shouldReceive('get')->once()->with('middleware.priority', [])->andReturn(['FooMiddleware', 'BarMiddleware']);
+        $this->config->shouldReceive('get')->once()->with('middleware.priority', [])
+            ->andReturn(['FooMiddleware', 'BarMiddleware']);
 
         $this->middleware->import([function ($request, $next) {
             return $next($request);

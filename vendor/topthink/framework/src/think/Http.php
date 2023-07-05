@@ -2,13 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think;
 
@@ -24,12 +24,6 @@ use Throwable;
  */
 class Http
 {
-
-    /**
-     * @var App
-     */
-    protected $app;
-
     /**
      * 应用名称
      * @var string
@@ -43,15 +37,19 @@ class Http
     protected $path;
 
     /**
+     * 路由路径
+     * @var string
+     */
+    protected $routePath;
+
+    /**
      * 是否绑定应用
      * @var bool
      */
     protected $isBind = false;
 
-    public function __construct(App $app)
+    public function __construct(protected App $app)
     {
-        $this->app = $app;
-
         $this->routePath = $this->app->getRootPath() . 'route' . DIRECTORY_SEPARATOR;
     }
 
@@ -85,7 +83,7 @@ class Http
      */
     public function path(string $path)
     {
-        if (substr($path, -1) != DIRECTORY_SEPARATOR) {
+        if (str_ends_with($path, DIRECTORY_SEPARATOR)) {
             $path .= DIRECTORY_SEPARATOR;
         }
 
@@ -117,7 +115,6 @@ class Http
      * 设置路由目录
      * @access public
      * @param string $path 路由定义目录
-     * @return string
      */
     public function setRoutePath(string $path): void
     {
@@ -154,6 +151,9 @@ class Http
      */
     public function run(Request $request = null): Response
     {
+        //初始化
+        $this->initialize();
+
         //自动创建request对象
         $request = $request ?? $this->app->make('request', [], true);
         $this->app->instance('request', $request);
@@ -186,13 +186,8 @@ class Http
      */
     protected function runWithRequest(Request $request)
     {
-        $this->initialize();
-
         // 加载全局中间件
         $this->loadMiddleware();
-
-        // 设置开启事件机制
-        $this->app->event->withEvent($this->app->config->get('app.with_event', true));
 
         // 监听HttpRun
         $this->app->event->trigger(HttpRun::class);
@@ -281,5 +276,4 @@ class Http
         // 写入日志
         $this->app->log->save();
     }
-
 }

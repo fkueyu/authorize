@@ -1,14 +1,15 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db\connector;
 
@@ -16,15 +17,15 @@ use PDO;
 use think\db\PDOConnection;
 
 /**
- * mysql数据库驱动
+ * mysql数据库驱动.
  */
 class Mysql extends PDOConnection
 {
-
     /**
-     * 解析pdo连接的dsn信息
-     * @access protected
-     * @param  array $config 连接信息
+     * 解析pdo连接的dsn信息.
+     *
+     * @param array $config 连接信息
+     *
      * @return string
      */
     protected function parseDsn(array $config): string
@@ -46,17 +47,18 @@ class Mysql extends PDOConnection
     }
 
     /**
-     * 取得数据表的字段信息
-     * @access public
-     * @param  string $tableName
+     * 取得数据表的字段信息.
+     *
+     * @param string $tableName
+     *
      * @return array
      */
     public function getFields(string $tableName): array
     {
         [$tableName] = explode(' ', $tableName);
 
-        if (false === strpos($tableName, '`')) {
-            if (strpos($tableName, '.')) {
+        if (!str_contains($tableName, '`')) {
+            if (str_contains($tableName, '.')) {
                 $tableName = str_replace('.', '`.`', $tableName);
             }
             $tableName = '`' . $tableName . '`';
@@ -74,10 +76,10 @@ class Mysql extends PDOConnection
                 $info[$val['field']] = [
                     'name'    => $val['field'],
                     'type'    => $val['type'],
-                    'notnull' => (bool) ('' === $val['null']), // not null is empty, null is yes
+                    'notnull' => 'NO' == $val['null'],
                     'default' => $val['default'],
-                    'primary' => (strtolower($val['key']) == 'pri'),
-                    'autoinc' => (strtolower($val['extra']) == 'auto_increment'),
+                    'primary' => strtolower($val['key']) == 'pri',
+                    'autoinc' => strtolower($val['extra']) == 'auto_increment',
                     'comment' => $val['comment'],
                 ];
             }
@@ -87,9 +89,10 @@ class Mysql extends PDOConnection
     }
 
     /**
-     * 取得数据库的表信息
-     * @access public
-     * @param  string $dbName
+     * 取得数据库的表信息.
+     *
+     * @param string $dbName
+     *
      * @return array
      */
     public function getTables(string $dbName = ''): array
@@ -113,11 +116,12 @@ class Mysql extends PDOConnection
 
     /**
      * 启动XA事务
-     * @access public
-     * @param  string $xid XA事务id
+     *
+     * @param string $xid XA事务id
+     *
      * @return void
      */
-    public function startTransXa(string $xid)
+    public function startTransXa(string $xid): void
     {
         $this->initConnect(true);
         $this->linkID->exec("XA START '$xid'");
@@ -125,11 +129,12 @@ class Mysql extends PDOConnection
 
     /**
      * 预编译XA事务
-     * @access public
-     * @param  string $xid XA事务id
+     *
+     * @param string $xid XA事务id
+     *
      * @return void
      */
-    public function prepareXa(string $xid)
+    public function prepareXa(string $xid): void
     {
         $this->initConnect(true);
         $this->linkID->exec("XA END '$xid'");
@@ -138,11 +143,12 @@ class Mysql extends PDOConnection
 
     /**
      * 提交XA事务
-     * @access public
-     * @param  string $xid XA事务id
+     *
+     * @param string $xid XA事务id
+     *
      * @return void
      */
-    public function commitXa(string $xid)
+    public function commitXa(string $xid): void
     {
         $this->initConnect(true);
         $this->linkID->exec("XA COMMIT '$xid'");
@@ -150,11 +156,12 @@ class Mysql extends PDOConnection
 
     /**
      * 回滚XA事务
-     * @access public
-     * @param  string $xid XA事务id
+     *
+     * @param string $xid XA事务id
+     *
      * @return void
      */
-    public function rollbackXa(string $xid)
+    public function rollbackXa(string $xid): void
     {
         $this->initConnect(true);
         $this->linkID->exec("XA ROLLBACK '$xid'");

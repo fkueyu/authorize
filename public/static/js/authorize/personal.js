@@ -1,4 +1,4 @@
-layui.use(['element', 'layer', 'table'], function () {
+layui.use(function () {
   var element = layui.element
     , table = layui.table
     , layer = layui.layer;

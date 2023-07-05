@@ -2,12 +2,21 @@
 
 namespace app\controller;
 
+use app\BaseController;
 use think\facade\{Session, View, Request};
 use app\model\{User, Log};
 
-class Index
+class Index extends BaseController
 {
-
+    //首页
+  public function index()
+  {
+    if ('' != Session::get('id')) {
+      return View::fetch('/header/index');
+    } else {
+      return View::fetch('/login');
+    }
+  }
   public function login()
   {
     $username = Request::param('username');
@@ -23,17 +32,6 @@ class Index
       return View::fetch('/login');
     }
   }
-
-  //首页
-  public function index()
-  {
-    if ('' != Session::get('id')) {
-      return View::fetch('/header/index');
-    } else {
-      return View::fetch('/login');
-    }
-  }
-
   //注销登录
   public function logout()
   {

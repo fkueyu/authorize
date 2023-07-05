@@ -2,13 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\cache;
 
@@ -64,7 +64,7 @@ abstract class Driver implements CacheInterface, CacheHandlerInterface
      * @param integer|DateTimeInterface|DateInterval $expire 有效期
      * @return int
      */
-    protected function getExpireTime($expire): int
+    protected function getExpireTime(int|DateTimeInterface|DateInterval $expire): int
     {
         if ($expire instanceof DateTimeInterface) {
             $expire = $expire->getTimestamp() - time();
@@ -74,7 +74,7 @@ abstract class Driver implements CacheInterface, CacheHandlerInterface
                 ->format('U') - time();
         }
 
-        return (int) $expire;
+        return $expire;
     }
 
     /**
@@ -131,17 +131,31 @@ abstract class Driver implements CacheInterface, CacheHandlerInterface
     }
 
     /**
+     * 追加TagSet数据
+     * @access public
+     * @param string $name  缓存变量名
+     * @param mixed  $value 存储数据
+     * @return void
+     */
+    public function append(string $name, $value): void
+    {
+        $this->push($name, $value);
+    }
+
+    /**
      * 如果不存在则写入缓存
      * @access public
      * @param string $name   缓存变量名
      * @param mixed  $value  存储数据
-     * @param int    $expire 有效时间 0为永久
+     * @param int|DateInterval    $expire 有效时间 0为永久
      * @return mixed
      */
-    public function remember(string $name, $value, $expire = null)
+    public function remember(string $name, $value, int|DateInterval $expire = null)
     {
         if ($this->has($name)) {
-            return $this->get($name);
+            if (($hit = $this->get($name)) !== null) {
+                return $hit;
+            }
         }
 
         $time = time();
@@ -179,15 +193,12 @@ abstract class Driver implements CacheInterface, CacheHandlerInterface
      * @param string|array $name 标签名
      * @return TagSet
      */
-    public function tag($name): TagSet
+    public function tag(string|array $name): TagSet
     {
         $name = (array) $name;
         $key  = implode('-', $name);
 
         if (!isset($this->tag[$key])) {
-            $name = array_map(function ($val) {
-                return $this->getTagKey($val);
-            }, $name);
             $this->tag[$key] = new TagSet($name, $this);
         }
 
@@ -202,7 +213,8 @@ abstract class Driver implements CacheInterface, CacheHandlerInterface
      */
     public function getTagItems(string $tag): array
     {
-        return $this->get($tag, []);
+        $name = $this->getTagKey($tag);
+        return $this->get($name, []);
     }
 
     /**
@@ -289,7 +301,7 @@ abstract class Driver implements CacheInterface, CacheHandlerInterface
      * @return iterable
      * @throws InvalidArgumentException
      */
-    public function getMultiple($keys, $default = null): iterable
+    public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
         $result = [];
 
@@ -307,7 +319,7 @@ abstract class Driver implements CacheInterface, CacheHandlerInterface
      * @param null|int|\DateInterval $ttl    有效时间 0为永久
      * @return bool
      */
-    public function setMultiple($values, $ttl = null): bool
+    public function setMultiple(iterable $values, int|DateInterval $ttl = null): bool
     {
         foreach ($values as $key => $val) {
             $result = $this->set($key, $val, $ttl);
@@ -327,7 +339,7 @@ abstract class Driver implements CacheInterface, CacheHandlerInterface
      * @return bool
      * @throws InvalidArgumentException
      */
-    public function deleteMultiple($keys): bool
+    public function deleteMultiple(iterable $keys): bool
     {
         foreach ($keys as $key) {
             $result = $this->delete($key);

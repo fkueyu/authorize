@@ -9,7 +9,7 @@ function addUser() {
   });
 }
 var from;
-layui.use(['element', 'form', 'layer', 'table'], function () {
+layui.use(function () {
   form = layui.form;
   var element = layui.element
     , table = layui.table
@@ -33,7 +33,21 @@ layui.use(['element', 'form', 'layer', 'table'], function () {
       , { field: 'position', edit: 'text', title: '职位', width: 160 }
       , { field: 'group', title: '用户角色', width: 160 }
       , { field: 'update_time', title: '更新时间', width: 120, sort: true }
-      , { field: 'status', title: '账户状态', width: 110, templet: "<div>{{ status(d.status,d.id)}}</div>" }
+      , {
+        field: 'status', title: '账户状态', width: 110, templet: function (d) {
+          if (d.id === 1) {
+            return '<input type="checkbox" name="lock" value="' + d.id + '" title="启用" lay-filter="lockstatus" checked="checked" disabled="" lay-skin="tag">';
+          } else {
+            if (d.status === 0) {
+              return '<input type="checkbox" name="lock" value="' + d.id + '" title="启用" lay-filter="lockstatus" lay-skin="tag">';
+            } else if (d.status === 1) {
+              return '<input type="checkbox" name="lock" value="' + d.id + '" title="启用" lay-filter="lockstatus" checked="checked" lay-skin="tag">';
+            } else {
+              return d.status;
+            }
+          }
+        }
+      }
       , { fixed: 'right', width: 100, title: '操作', align: 'center', toolbar: '#toolbar' } //这里的toolbar值是模板元素的选择器
     ]]
   });
@@ -117,23 +131,6 @@ layui.use(['element', 'form', 'layer', 'table'], function () {
     }
   });
 });
-//传入URL前缀及字段值
-function status(vals, id) {
-  //判断是否需要拼接URL
-  if (id === 1) {
-    result = '<input type="checkbox" name="lock" value="' + id + '" title="启用" lay-filter="lockstatus" checked="checked" disabled="">';
-  } else {
-    if (vals === 0) {
-      result = '<input type="checkbox" name="lock" value="' + id + '" title="启用" lay-filter="lockstatus">';
-    } else if (vals === 1) {
-      result = '<input type="checkbox" name="lock" value="' + id + '" title="启用" lay-filter="lockstatus" checked="checked">';
-    } else {
-      result = vals;
-    }
-  }
-  return result;
-}
-
 //传入URL前缀及字段值
 function operation(id) {
   var result = '<a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon">&#xe640;</i> 重置密码</a>';

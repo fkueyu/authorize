@@ -67,24 +67,24 @@ abstract class Make extends Command
 
     protected function getPathName(string $name): string
     {
-        $name = str_replace('app\\', '', $name);
+        $name = substr($name, 4);
 
         return $this->app->getBasePath() . ltrim(str_replace('\\', '/', $name), '/') . '.php';
     }
 
     protected function getClassName(string $name): string
     {
-        if (strpos($name, '\\') !== false) {
+        if (str_contains($name, '\\')) {
             return $name;
         }
 
-        if (strpos($name, '@')) {
+        if (str_contains($name, '@')) {
             [$app, $name] = explode('@', $name);
         } else {
             $app = '';
         }
 
-        if (strpos($name, '/') !== false) {
+        if (str_contains($name, '/')) {
             $name = str_replace('/', '\\', $name);
         }
 

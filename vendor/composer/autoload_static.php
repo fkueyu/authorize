@@ -4,13 +4,12 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit4cd38300c968243bb6c3665aede8395f
+class ComposerStaticInit2df81575d6465eb1bcce270fc60f6f6d
 {
     public static $files = array (
         '9b552a3cc426e3287cc811caefa3cf53' => __DIR__ . '/..' . '/topthink/think-helper/src/helper.php',
-        '538ca81a9a966a6716601ecf48f4eaef' => __DIR__ . '/..' . '/opis/closure/functions.php',
+        '35fab96057f1bf5e7aba31a8a6d5fdde' => __DIR__ . '/..' . '/topthink/think-orm/stubs/load_stubs.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
-        '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
     );
 
@@ -28,7 +27,6 @@ class ComposerStaticInit4cd38300c968243bb6c3665aede8395f
         ),
         'S' => 
         array (
-            'Symfony\\Polyfill\\Php72\\' => 23,
             'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Component\\VarDumper\\' => 28,
         ),
@@ -36,16 +34,12 @@ class ComposerStaticInit4cd38300c968243bb6c3665aede8395f
         array (
             'Psr\\SimpleCache\\' => 16,
             'Psr\\Log\\' => 8,
+            'Psr\\Http\\Message\\' => 17,
             'Psr\\Container\\' => 14,
-            'Psr\\Cache\\' => 10,
-        ),
-        'O' => 
-        array (
-            'Opis\\Closure\\' => 13,
         ),
         'L' => 
         array (
-            'League\\Flysystem\\Cached\\' => 24,
+            'League\\MimeTypeDetection\\' => 25,
             'League\\Flysystem\\' => 17,
         ),
     );
@@ -66,17 +60,14 @@ class ComposerStaticInit4cd38300c968243bb6c3665aede8395f
         'think\\' => 
         array (
             0 => __DIR__ . '/..' . '/topthink/framework/src/think',
-            1 => __DIR__ . '/..' . '/topthink/think-helper/src',
-            2 => __DIR__ . '/..' . '/topthink/think-orm/src',
-            3 => __DIR__ . '/..' . '/topthink/think-template/src',
+            1 => __DIR__ . '/..' . '/topthink/think-filesystem/src',
+            2 => __DIR__ . '/..' . '/topthink/think-helper/src',
+            3 => __DIR__ . '/..' . '/topthink/think-orm/src',
+            4 => __DIR__ . '/..' . '/topthink/think-template/src',
         ),
         'app\\' => 
         array (
             0 => __DIR__ . '/../..' . '/app',
-        ),
-        'Symfony\\Polyfill\\Php72\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-php72',
         ),
         'Symfony\\Polyfill\\Mbstring\\' => 
         array (
@@ -92,23 +83,19 @@ class ComposerStaticInit4cd38300c968243bb6c3665aede8395f
         ),
         'Psr\\Log\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+            0 => __DIR__ . '/..' . '/psr/log/src',
+        ),
+        'Psr\\Http\\Message\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
         'Psr\\Container\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
         ),
-        'Psr\\Cache\\' => 
+        'League\\MimeTypeDetection\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/cache/src',
-        ),
-        'Opis\\Closure\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/opis/closure/src',
-        ),
-        'League\\Flysystem\\Cached\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/league/flysystem-cached-adapter/src',
+            0 => __DIR__ . '/..' . '/league/mime-type-detection/src',
         ),
         'League\\Flysystem\\' => 
         array (
@@ -120,12 +107,17 @@ class ComposerStaticInit4cd38300c968243bb6c3665aede8395f
         0 => __DIR__ . '/../..' . '/extend',
     );
 
+    public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+    );
+
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit4cd38300c968243bb6c3665aede8395f::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit4cd38300c968243bb6c3665aede8395f::$prefixDirsPsr4;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit4cd38300c968243bb6c3665aede8395f::$fallbackDirsPsr0;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit2df81575d6465eb1bcce270fc60f6f6d::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit2df81575d6465eb1bcce270fc60f6f6d::$prefixDirsPsr4;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit2df81575d6465eb1bcce270fc60f6f6d::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit2df81575d6465eb1bcce270fc60f6f6d::$classMap;
 
         }, null, ClassLoader::class);
     }

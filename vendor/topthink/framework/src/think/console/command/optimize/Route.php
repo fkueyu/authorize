@@ -46,22 +46,21 @@ class Route extends Command
         $this->app->route->lazy(false);
 
         // 路由检测
-        $path = $this->app->getRootPath() . ($dir ? 'app' . DIRECTORY_SEPARATOR . $dir . DIRECTORY_SEPARATOR : '') . 'route' . DIRECTORY_SEPARATOR ;
+        $path = $this->app->getRootPath() . ($dir ? 'app' . DIRECTORY_SEPARATOR . $dir . DIRECTORY_SEPARATOR : '') . 'route' . DIRECTORY_SEPARATOR;
 
         $files = is_dir($path) ? scandir($path) : [];
 
         foreach ($files as $file) {
-            if (strpos($file, '.php')) {
+            if (str_contains($file, '.php')) {
                 include $path . $file;
             }
         }
 
         //触发路由载入完成事件
         $this->app->event->trigger(RouteLoaded::class);
+        $rules = $this->app->route->getName();
 
-        $content = '<?php ' . PHP_EOL . 'return ';
-        $content .= '\Opis\Closure\unserialize(\'' . \Opis\Closure\serialize($this->app->route->getName()) . '\');';
-        return $content;
+        return '<?php ' . PHP_EOL . 'return unserialize(\'' . serialize($rules) . '\');';
     }
 
 }

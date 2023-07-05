@@ -1,80 +1,45 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db\concern;
-
-use think\db\BaseQuery;
 
 /**
  * 事务支持
  */
 trait Transaction
 {
-
     /**
      * 执行数据库Xa事务
-     * @access public
-     * @param  callable $callback 数据操作方法回调
-     * @param  array    $dbs      多个查询对象或者连接对象
-     * @return mixed
+     *
+     * @param callable $callback 数据操作方法回调
+     * @param array    $dbs      多个查询对象或者连接对象
+     *
      * @throws PDOException
      * @throws \Exception
      * @throws \Throwable
+     *
+     * @return mixed
      */
-    public function transactionXa($callback, array $dbs = [])
+    public function transactionXa(callable $callback, array $dbs = [])
     {
-        $xid = uniqid('xa');
-
-        if (empty($dbs)) {
-            $dbs[] = $this->getConnection();
-        }
-
-        foreach ($dbs as $key => $db) {
-            if ($db instanceof BaseQuery) {
-                $db = $db->getConnection();
-
-                $dbs[$key] = $db;
-            }
-
-            $db->startTransXa($xid);
-        }
-
-        try {
-            $result = null;
-            if (is_callable($callback)) {
-                $result = call_user_func_array($callback, [$this]);
-            }
-
-            foreach ($dbs as $db) {
-                $db->prepareXa($xid);
-            }
-
-            foreach ($dbs as $db) {
-                $db->commitXa($xid);
-            }
-
-            return $result;
-        } catch (\Exception | \Throwable $e) {
-            foreach ($dbs as $db) {
-                $db->rollbackXa($xid);
-            }
-            throw $e;
-        }
+        return $this->connection->transactionXa($callback, $dbs);
     }
 
     /**
      * 执行数据库事务
-     * @access public
+     *
      * @param callable $callback 数据操作方法回调
+     *
      * @return mixed
      */
     public function transaction(callable $callback)
@@ -84,7 +49,7 @@ trait Transaction
 
     /**
      * 启动事务
-     * @access public
+     *
      * @return void
      */
     public function startTrans(): void
@@ -93,10 +58,11 @@ trait Transaction
     }
 
     /**
-     * 用于非自动提交状态下面的查询提交
-     * @access public
-     * @return void
+     * 用于非自动提交状态下面的查询提交.
+     *
      * @throws PDOException
+     *
+     * @return void
      */
     public function commit(): void
     {
@@ -104,14 +70,62 @@ trait Transaction
     }
 
     /**
-     * 事务回滚
-     * @access public
-     * @return void
+     * 事务回滚.
+     *
      * @throws PDOException
+     *
+     * @return void
      */
     public function rollback(): void
     {
         $this->connection->rollback();
     }
 
+    /**
+     * 启动XA事务
+     *
+     * @param string $xid XA事务id
+     *
+     * @return void
+     */
+    public function startTransXa(string $xid): void
+    {
+        $this->connection->startTransXa($xid);
+    }
+
+    /**
+     * 预编译XA事务
+     *
+     * @param string $xid XA事务id
+     *
+     * @return void
+     */
+    public function prepareXa(string $xid): void
+    {
+        $this->connection->prepareXa($xid);
+    }
+
+    /**
+     * 提交XA事务
+     *
+     * @param string $xid XA事务id
+     *
+     * @return void
+     */
+    public function commitXa(string $xid): void
+    {
+        $this->connection->commitXa($xid);
+    }
+
+    /**
+     * 回滚XA事务
+     *
+     * @param string $xid XA事务id
+     *
+     * @return void
+     */
+    public function rollbackXa(string $xid): void
+    {
+        $this->connection->rollbackXa($xid);
+    }
 }

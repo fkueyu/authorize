@@ -2,16 +2,17 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\cache\driver;
 
+use DateInterval;
 use think\cache\Driver;
 
 /**
@@ -87,7 +88,7 @@ class Redis extends Driver
         }
 
         if (0 != $this->options['select']) {
-            $this->handler->select($this->options['select']);
+            $this->handler->select((int) $this->options['select']);
         }
     }
 
@@ -97,7 +98,7 @@ class Redis extends Driver
      * @param string $name 缓存变量名
      * @return bool
      */
-    public function has($name): bool
+    public function has(string $name): bool
     {
         return $this->handler->exists($this->getCacheKey($name)) ? true : false;
     }
@@ -109,11 +110,11 @@ class Redis extends Driver
      * @param mixed  $default 默认值
      * @return mixed
      */
-    public function get($name, $default = null)
+    public function get(string $name, mixed $default = null): mixed
     {
         $this->readTimes++;
-
-        $value = $this->handler->get($this->getCacheKey($name));
+        $key   = $this->getCacheKey($name);
+        $value = $this->handler->get($key);
 
         if (false === $value || is_null($value)) {
             return $default;
@@ -127,10 +128,10 @@ class Redis extends Driver
      * @access public
      * @param string            $name   缓存变量名
      * @param mixed             $value  存储数据
-     * @param integer|\DateTime $expire 有效时间（秒）
+     * @param integer|DateInterval $expire 有效时间（秒）
      * @return bool
      */
-    public function set($name, $value, $expire = null): bool
+    public function set(string $name, mixed $value, int|DateInterval $expire = null): bool
     {
         $this->writeTimes++;
 
@@ -161,7 +162,6 @@ class Redis extends Driver
     public function inc(string $name, int $step = 1)
     {
         $this->writeTimes++;
-
         $key = $this->getCacheKey($name);
 
         return $this->handler->incrby($key, $step);
@@ -177,7 +177,6 @@ class Redis extends Driver
     public function dec(string $name, int $step = 1)
     {
         $this->writeTimes++;
-
         $key = $this->getCacheKey($name);
 
         return $this->handler->decrby($key, $step);
@@ -189,11 +188,12 @@ class Redis extends Driver
      * @param string $name 缓存变量名
      * @return bool
      */
-    public function delete($name): bool
+    public function delete(string $name): bool
     {
         $this->writeTimes++;
 
-        $result = $this->handler->del($this->getCacheKey($name));
+        $key    = $this->getCacheKey($name);
+        $result = $this->handler->del($key);
         return $result > 0;
     }
 
@@ -205,7 +205,6 @@ class Redis extends Driver
     public function clear(): bool
     {
         $this->writeTimes++;
-
         $this->handler->flushDB();
         return true;
     }
@@ -223,15 +222,16 @@ class Redis extends Driver
     }
 
     /**
-     * 追加（数组）缓存数据
+     * 追加TagSet数据
      * @access public
      * @param string $name  缓存标识
      * @param mixed  $value 数据
      * @return void
      */
-    public function push(string $name, $value): void
+    public function append(string $name, $value): void
     {
-        $this->handler->sAdd($name, $value);
+        $key = $this->getCacheKey($name);
+        $this->handler->sAdd($key, $value);
     }
 
     /**
@@ -242,7 +242,8 @@ class Redis extends Driver
      */
     public function getTagItems(string $tag): array
     {
-        return $this->handler->sMembers($tag);
+        $name = $this->getTagKey($tag);
+        $key  = $this->getCacheKey($name);
+        return $this->handler->sMembers($key);
     }
-
 }

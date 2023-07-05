@@ -1,130 +1,65 @@
-//使用treeTable扩展
-layui.config({
-  base: '/static/js/',
-})
-var treeTable, re, form;
-layui.use(['element', 'treeTable', 'layer', 'code', 'form'], function () {
+var treeTable;
+layui.use(function () {
   treeTable = layui.treeTable;
-  var o = layui.$,
-    form = layui.form,
-    layer = layui.layer;
-  var e = layer.load(2, { shade: [0.2, '#2F4056'] }); //打开数据加载动画
-  re = treeTable.render({
-    elem: '#tree-table',
-    url: '/authorize/getRules/',
-    icon_key: 'title',// 必须
-    cols: [
+  var layer = layui.layer;
+  var dropdown = layui.dropdown
+  var form = layui.form;
+  // 渲染
+  var inst = treeTable.render({
+    elem: '#ID-treeTable',
+    pid: 'pid',
+    url: '/authorize/getSubRules', // 此处为静态模拟数据，实际使用时需换成真实接口
+    tree: {
+      // 异步加载子节点
+      async: {
+        enable: true,
+        url: '/authorize/getSubRules', // 此处为静态模拟数据，实际使用时需换成真实接口
+        autoParam: ["pid=id"]
+      }
+    },
+    maxHeight: '501px',
+    toolbar: '#TPL-treeTable',
+    cols: [[
+      { field: 'id', title: 'ID', width: 55, fixed: 'left' },
+      { field: 'name', title: '名称', width: 160 },
+      { field: 'title', title: '控制器', width: 120 },
+      { field: 'pid', title: '父ID', width: 50 },
+      { field: 'navid', title: '排序', width: 50 },
+      { field: 'condition', title: '条件', width: 120 },
       {
-        key: 'title',
-        title: '控制器',
-        width: '180px',
-        template: function (item) {
-          if (item.level == 0) {
-            return '<span style="color:#FF5722;">' + item.title + '</span>';
-          } else if (item.level == 1) {
-            return '<span style="color:#009688;">' + item.title + '</span>';
-          } else if (item.level == 2) {
-            return '<span style="color:#5FB878;">' + item.title + '</span>';
-          }
-        }
-      },
-      {
-        key: 'id',
-        title: 'ID',
-        width: '20px',
-        align: 'center',
-      },
-      {
-        key: 'pid',
-        title: '父ID',
-        width: '20px',
-        align: 'center',
-      },
-      {
-        key: 'navid',
-        title: '排序',
-        width: '20px',
-        align: 'center',
-      },
-      {
-        key: 'name',
-        title: '名称',
-        width: '80px',
-        align: 'center',
-      },
-      {
-        key: 'condition',
-        title: '条件',
-        width: '80px',
-        align: 'center',
-      },
-      {
-        key: 'type',
-        title: '条件状态',
-        width: '80px',
-        align: 'center',
-        template: function (item) {
-          var result = '';
+        field: 'type', title: '条件状态', width: 90, templet: function (item) {
           if (item.id != 1) {
             if (item.type == 1) {
-              result = '<input type="checkbox" name="type" value="' + item.id + '" lay-skin="switch" lay-text="启用|禁用" lay-filter="typeSwitch" checked="checked">'
+              return '<input type="checkbox" name="type" value="' + item.id + '" lay-skin="switch" lay-text="启用|禁用" lay-filter="typeSwitch" checked="checked">'
             } else if (item.type == 'null') {
-              result = '';
+              return '';
             } else {
-              result = '<input type="checkbox" name="type" value="' + item.id + '" lay-skin="switch" lay-text="启用|禁用" lay-filter="typeSwitch">'
+              return '<input type="checkbox" name="type" value="' + item.id + '" lay-skin="switch" lay-text="启用|禁用" lay-filter="typeSwitch">'
             }
-          }
-
-          return result;
-        }
-      },
-      {
-        key: 'remarks',
-        title: '备注',
-        width: '200px',
-        align: 'center',
-      },
-      {
-        key: 'status',
-        title: '规则状态',
-        width: '80px',
-        align: 'center',
-        template: function (item) {
-          var result = '';
-          if (item.id != 1) {
-            if (item.status == 1) {
-              result = '<input type="checkbox" name="type" value="' + item.id + '" lay-skin="switch" lay-text="启用|禁用" lay-filter="statusSwitch" checked="checked">'
-            } else if (item.status == 'null') {
-              result = '';
-            } else {
-              result = '<input type="checkbox" name="type" value="' + item.id + '" lay-skin="switch" lay-text="启用|禁用" lay-filter="statusSwitch">'
-            }
-          }
-          return result;
-        }
-      },
-      {
-        title: '操作',
-        align: 'left',
-        width: '200px',
-        template: function (item) {
-          var add = '<a class="layui-btn layui-btn-sm" onclick="add(' + item.id + ')"><i class="layui-icon">&#xe654;</i>子规则</a>';
-          var modify = '<a class="layui-btn layui-btn-normal layui-btn-sm" onclick="modify(' + item.id + ')"><i class="layui-icon">&#xe642;</i></a>';
-          var del = '<a class="layui-btn layui-btn-danger layui-btn-sm" onclick="del(' + item.id + ')"><i class="layui-icon">&#xe640;</i></a>';
-          if (item.level == 0) {
-            return add + modify;
-          } else if (item.level == 1) {
-            return add + modify + del;
           } else {
-            return modify + del;
+            return '<input type="checkbox" name="type" value="' + item.id + '" lay-skin="switch" lay-text="启用|禁用" lay-filter="typeSwitch" checked="checked" disabled="">'
           }
         }
-      }
-    ],
-    end: function () {
-      form.render();  //因表单动态生成需手动渲染表单元素
-      layer.close(e); //关闭加载动画
-    }
+      },
+      {
+        field: 'status', title: '规则状态', width: 90, templet: function (d) {
+          if (d.id != 1) {
+            if (d.status == 1) {
+              return '<input type="checkbox" name="type" value="' + d.id + '" lay-skin="switch" lay-text="启用|禁用" lay-filter="statusSwitch" checked="checked">'
+            } else if (d.status == 'null') {
+              return '';
+            } else {
+              return '<input type="checkbox" name="type" value="' + d.id + '" lay-skin="switch" lay-text="启用|禁用" lay-filter="statusSwitch">'
+            }
+          } else {
+            return '<input type="checkbox" name="type" value="' + d.id + '" lay-skin="switch" lay-text="启用|禁用" lay-filter="statusSwitch" checked="checked"  disabled="">'
+          }
+        }
+      },
+      { field: 'remarks', title: '备注', width: 80 },
+      { fixed: "right", title: "操作", width: 150, align: "center", toolbar: '#TPL-treeTable-tools' }
+    ]],
+    page: true
   });
   //监听指定开关
   form.on('switch(typeSwitch)', function (data) {
@@ -152,74 +87,113 @@ layui.use(['element', 'treeTable', 'layer', 'code', 'form'], function () {
       layer.msg(msg, { time: 1000 });
     });
   });
-  // 全部展开
-  o('.open-all').click(function () {
-    treeTable.openAll(re);
-  })
-  // 全部关闭
-  o('.close-all').click(function () {
-    treeTable.closeAll(re);
-  })
-})
-function del(id) {
-  layer.confirm('确认删除该规则？', function (index) {
-    $.post("/authorize/delRules", { id: id }, function (data) {
-      if (data.code === 0) {
-        treeTable.render(re);
-      }
-      layer.close(index);
-      layer.msg(data.msg, { time: 2000 });
-    });
+  // 表头工具栏工具事件
+  treeTable.on("toolbar(ID-treeTable)", function (obj) {
+    var config = obj.config;
+    var tableId = config.id;
+    var status = treeTable.checkStatus(tableId);
+    // 获取选中行
+    if (obj.event === "closeAll") {
+      treeTable.expandAll('ID-treeTable', false);
+    } else if (obj.event === "openAll") {
+      treeTable.expandAll('ID-treeTable', true);
+    }
   });
-}
-function add(id) {
-  var index = layer.open({
-    type: 1
-    , title: '添加规则'
-    , area: ['460px', '410px']
-    , content: '<br><form id="new_menu" class="layui-form" action=""><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">名称</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="title" id="title" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">控制器</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="name" id="name" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">条件</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="condition" id="condition" autocomplete="off" value="{status} === 1"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">备注</label><div class="layui-inline" style="width: 340px;"><textarea placeholder="请输入内容" name="remarks" id="remarks" class="layui-textarea"></textarea></div></div><input name="pid" id="pid" type="hidden" value="' + id + '"></form>' //这里content是一个普通的String
-    , btn: ['提交', '关闭']
-    , yes: function () {
-      //通过ajax提交数据
-      if ($('#name').val() == '' || $('#title').val() == '') {
-        layer.msg('名称和控制器字段不能为空', { time: 2000 });
-      } else {
-        $.post("/authorize/saveRules", $("#new_menu").serialize(), function (data) {
-          if (data.code === 0) {
-            treeTable.render(re);
+  // 单元格工具事件
+  treeTable.on('tool(' + inst.config.id + ')', function (obj) {
+    var layEvent = obj.event; // 获得 lay-event 对应的值
+    var trElem = obj.tr;
+    var trData = obj.data;
+    var tableId = obj.config.id;
+    if (layEvent === "addChild") {
+      var index = layer.open({
+        type: 1
+        , title: '添加规则'
+        , area: ['460px', '410px']
+        , content: '<br><form id="new_menu" class="layui-form" action=""><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">名称</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="title" id="title" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">控制器</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="name" id="name" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">条件</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="condition" id="condition" autocomplete="off" value="{status} === 1"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">备注</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="remarks" id="remarks" autocomplete="off"></div></div><input name="pid" id="pid" type="hidden" value="' + trData.id + '"></form>' //这里content是一个普通的String
+        , btn: ['提交', '关闭']
+        , yes: function () {
+          //通过ajax提交数据
+          if ($('#name').val() == '' || $('#title').val() == '') {
+            layer.msg('名称和控制器字段不能为空', { time: 2000 });
+          } else {
+            $.post("/authorize/saveRules", $("#new_menu").serialize(), function (data) {
+              if (data.code === 0) {
+                var newdata = {
+                  id: data.id,
+                  name: $('#name').val(),
+                  title: $('#title').val(),
+                  condition: $('#condition').val(),
+                  remarks: $('#remarks').val(),
+                  type: 1,
+                  status: 1,
+                  pid: trData.id,
+                  navid: 0
+                };
+                treeTable.addNodes(tableId, {
+                  parentIndex: trData["LAY_DATA_INDEX"],
+                  index: -1,
+                  data: newdata
+                });
+              }
+              layer.close(index);
+              layer.msg(data.msg, { time: 2000 });
+            });
+          }
+        }
+        , btn2: function () {
+          layer.close(index);
+        }
+      });
+    } else if (layEvent === "modify") {
+      $.post("/authorize/getRules", { id: trData.id }, function (result) {
+        var index = layer.open({
+          type: 1
+          , title: '修改规则'
+          , area: ['480px', '530px']
+          , content: '<br><form id="mod_menu" class="layui-form" action=""><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">父ID</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="pid" id="pid" readonly="" value="' + result.data.pid + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">名称</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="title" id="title" value="' + result.data.name + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">控制器</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="name" id="name" value="' + result.data.title + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">条件</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="condition" id="condition" value="' + result.data.condition + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">排序规则</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="navid" id="navid" value="' + result.data.navid + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">备注</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="remarks" id="remarks" value ="' + result.data.remarks + '"></div></div><input name="id" id="id" type="hidden" value="' + trData.id + '"></form>' //这里content是一个普通的String
+          , btn: ['提交', '关闭']
+          , yes: function () {
+            //通过ajax提交数据
+            $.post("/authorize/updateRules", $("#mod_menu").serialize(), function (data) {
+              if (result.data.code === 0) {
+                var newdata = {
+                  id: data.id,
+                  name: $('#name').val(),
+                  title: $('#title').val(),
+                  condition: $('#condition').val(),
+                  remarks: $('#remarks').val(),
+                  type: trData.type,
+                  status: trData.status,
+                  pid: trData.id,
+                  navid: $('#navid').val()
+                };
+                treeTable.addNodes(tableId, {
+                  parentIndex: trData["LAY_DATA_INDEX"],
+                  index: -1,
+                  data: newdata
+                });
+              }
+              layer.close(index);
+              layer.msg(data.msg, { time: 2000 });
+            });
+          }
+          , btn2: function () {
+            layer.close(index);
+          }
+        });
+      });
+    } else if (layEvent === "del") {
+      layer.confirm("真的删除[" + trData.name + "]行么", function (index) {
+        $.post("/authorize/delRules", { id: trData.id, pid: trData.pid }, function (data) {
+          if (data.code == 0) {
+            obj.del(); // 等效如下
+            // treeTable.removeNode(tableId, trElem.attr('data-index'))
           }
           layer.close(index);
           layer.msg(data.msg, { time: 2000 });
         });
-      }
-    }
-    , btn2: function () {
-      layer.close(index);
+      });
     }
   });
-}
-
-function modify(id) {
-  $.post("/authorize/getRules", { id: id }, function (result) {
-    var index = layer.open({
-      type: 1
-      , title: '修改规则'
-      , area: ['480px', '530px']
-      , content: '<br><form id="mod_menu" class="layui-form" action=""><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">父ID</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="pid" id="pid" value="' + result[0].pid + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">名称</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="title" id="title" value="' + result[0].name + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">控制器</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="name" id="name" value="' + result[0].title + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">条件</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="condition" id="condition" value="' + result[0].condition + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">排序规则</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="navid" id="navid" value="' + result[0].navid + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">备注</label><div class="layui-inline" style="width: 340px;"><textarea class="layui-textarea" name="remarks" id="remarks">' + result[0].remarks + '</textarea></div></div><input name="id" id="id" type="hidden" value="' + id + '"></form>' //这里content是一个普通的String
-      , btn: ['提交', '关闭']
-      , yes: function () {
-        //通过ajax提交数据
-        $.post("/authorize/updateRules", $("#mod_menu").serialize(), function (data) {
-          if (data.code === 0) {
-            treeTable.render(re);
-          }
-          layer.close(index);
-          layer.msg(data.msg, { time: 2000 });
-        });
-      }
-      , btn2: function () {
-        layer.close(index);
-      }
-    });
-  });
-}
+});

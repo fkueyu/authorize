@@ -7,7 +7,7 @@
   <title>Authorize 规则信息</title>
   <link rel="stylesheet" href="/static/layui/css/layui.css">
   <link rel="stylesheet" href="/static/css/font.css">
-  <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="/static/js/jquery.min.js" charset="utf-8"></script>
   <script src="/static/layui/layui.js" charset="utf-8"></script>
 </head>
 
@@ -18,15 +18,21 @@
     <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;margin-bottom: 10px;">
       <legend>规则管理</legend>
     </fieldset>
-    <div class="layui-from layui-form-pane" style="margin-bottom: 0px;">
-      <div class="userTable">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <div class="layui-inline">
-          <button type="button" class="layui-btn layui-btn-primary layui-btn-sm open-all">全部展开</button>
-          <button type="button" class="layui-btn layui-btn-primary layui-btn-sm close-all">全部关闭</button>
-        </div>
-      </div>
-    </div>
-    <table class="layui-table layui-form" id="tree-table"></table>
+
+    <table class="layui-hide" id="ID-treeTable"></table>
+    <script type="text/html" id="TPL-treeTable">
+  <div class="layui-btn-container">
+    <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" lay-event="openAll">全部展开</button>
+    <button type="button" class="layui-btn layui-btn-primary layui-btn-sm" lay-event="closeAll">全部关闭</button>
+  </div>
+</script>
+    <script type="text/html" id="TPL-treeTable-tools">
+  <div class="layui-btn-container">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="addChild"><i class="layui-icon layui-icon-add-1"></i></a>
+    <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="modify"><i class="layui-icon layui-icon-edit"></i></a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i></a>
+  </div>
+</script>
     <script src="/static/js/authorize/rules.js?{:time()}" charset="utf-8"></script>
     {include file="public/footer"/}
   </div>

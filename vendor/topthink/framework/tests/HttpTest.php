@@ -31,7 +31,7 @@ class HttpTest extends TestCase
         m::close();
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->app = m::mock(App::class)->makePartial();
 
@@ -123,6 +123,7 @@ class HttpTest extends TestCase
         $response = m::mock(Response::class);
 
         $this->app->shouldReceive('instance')->once()->with('request', $request);
+        $this->app->shouldReceive('initialize')->once();
 
         $exception = new Exception();
 

@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -60,7 +60,8 @@ class Pipeline
                 } catch (Throwable | Exception $e) {
                     return $this->handleException($passable, $e);
                 }
-            });
+            }
+        );
 
         return $pipeline($this->passable);
     }
@@ -102,5 +103,4 @@ class Pipeline
         }
         throw $e;
     }
-
 }

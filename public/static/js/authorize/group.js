@@ -1,5 +1,5 @@
 var from, tree, layer, util;
-layui.use(['element', 'layer', 'table', 'form', 'tree'], function () {
+layui.use(function () {
   form = layui.form
     , layer = layui.layer
     , util = layui.util
@@ -19,8 +19,32 @@ layui.use(['element', 'layer', 'table', 'form', 'tree'], function () {
       { field: 'ids', title: '#', width: 50, type: 'numbers', fixed: 'left' }
       , { field: 'id', title: 'ID', width: 60 }
       , { field: 'title', edit: 'text', title: '角色名', width: 200 }
-      , { field: 'status', title: '状态', width: 110, templet: "<div>{{ status(d.status,d.id)}}</div>" }
-      , { field: 'operation', title: '操作', width: 323, templet: "<div>{{ operation(d.id,d.title)}}</div>" }
+      , {
+        field: 'status', title: '状态', width: 110, templet: function (e) {
+          if (e.id === 1) {
+            return '<input type="checkbox" name="lock" value="' + e.id + '" title="启用" lay-filter="lockstatus" checked="checked" disabled="" lay-skin="tag">';
+          } else {
+            if (e.status === 0) {
+              return '<input type="checkbox" name="lock" value="' + e.id + '" title="启用" lay-filter="lockstatus" lay-skin="tag">';
+            } else if (e.status === 1) {
+              return '<input type="checkbox" name="lock" value="' + e.id + '" title="启用" lay-filter="lockstatus" checked="checked" lay-skin="tag">';
+            } else {
+              return e.status;
+            }
+          }
+        }
+      }
+      , {
+        field: 'operation', title: '操作', width: 350, templet: function (e) {
+          var result_mod = '<a class="layui-btn layui-btn-sm" onclick="groupUser(' + e.id + ",\'" + e.title + '\')"><i class="layui-icon">&#xe66f;</i> 角色成员</a><a class="layui-btn layui-btn-warm layui-btn-sm" onclick="userMenu(' + e.id + ",\'" + e.title + '\')"><i class="layui-icon">&#xe679;</i> 角色权限</a>';
+          var result_del = '<a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del"><i class="layui-icon">&#xe640;</i> 删除角色</a>';
+          if (e.id == 1) {
+            return result_mod;
+          } else {
+            return result_mod + result_del;
+          }
+        }
+      }
     ]]
   });
   var $ = layui.$, active = {

@@ -26,7 +26,7 @@ class EventTest extends TestCase
         m::close();
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->app = m::mock(App::class)->makePartial();
 
@@ -106,15 +106,6 @@ class EventTest extends TestCase
         $this->event->observe('SomeListener');
 
         $this->event->trigger('bar');
-    }
-
-    public function testWithoutEvent()
-    {
-        $this->event->withEvent(false);
-
-        $this->event->listen('SomeListener', TestListener::class);
-
-        $this->assertFalse($this->event->hasListener('SomeListener'));
     }
 
 }

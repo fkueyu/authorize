@@ -2,13 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\route\dispatch;
 
@@ -51,7 +51,7 @@ class Controller extends Dispatch
         // 获取控制器名
         $controller = strip_tags($result[0] ?: $this->rule->config('default_controller'));
 
-        if (strpos($controller, '.')) {
+        if (str_contains($controller, '.')) {
             $pos              = strrpos($controller, '.');
             $this->controller = substr($controller, 0, $pos) . '.' . Str::studly(substr($controller, $pos + 1));
         } else {
@@ -104,13 +104,20 @@ class Controller extends Dispatch
                     }
                 } else {
                     // 操作不存在
-                    throw new HttpException(404, 'method not exists:' . get_class($instance) . '->' . $action . '()');
+                    throw new HttpException(404, 'method not exists:' . $instance::class . '->' . $action . '()');
                 }
 
                 $data = $this->app->invokeReflectMethod($instance, $reflect, $vars);
 
                 return $this->autoResponse($data);
             });
+    }
+
+    protected function parseActions($actions)
+    {
+        return array_map(function ($item) {
+            return strtolower($item);
+        }, is_string($actions) ? explode(",", $actions) : $actions);
     }
 
     /**
@@ -128,27 +135,34 @@ class Controller extends Dispatch
             $reflectionProperty->setAccessible(true);
 
             $middlewares = $reflectionProperty->getValue($controller);
+            $action      = $this->request->action(true);
 
             foreach ($middlewares as $key => $val) {
                 if (!is_int($key)) {
-                    if (isset($val['only']) && !in_array($this->request->action(true), array_map(function ($item) {
-                        return strtolower($item);
-                    }, is_string($val['only']) ? explode(",", $val['only']) : $val['only']))) {
-                        continue;
-                    } elseif (isset($val['except']) && in_array($this->request->action(true), array_map(function ($item) {
-                        return strtolower($item);
-                    }, is_string($val['except']) ? explode(',', $val['except']) : $val['except']))) {
-                        continue;
-                    } else {
-                        $val = $key;
+                    $middleware = $key;
+                    $options    = $val;
+                } elseif (isset($val['middleware'])) {
+                    $middleware = $val['middleware'];
+                    $options    = $val['options'] ?? [];
+                } else {
+                    $middleware = $val;
+                    $options    = [];
+                }
+
+                if (isset($options['only']) && !in_array($action, $this->parseActions($options['only']))) {
+                    continue;
+                } elseif (isset($options['except']) && in_array($action, $this->parseActions($options['except']))) {
+                    continue;
+                }
+
+                if (is_string($middleware) && str_contains($middleware, ':')) {
+                    $middleware = explode(':', $middleware);
+                    if (count($middleware) > 1) {
+                        $middleware = [$middleware[0], array_slice($middleware, 1)];
                     }
                 }
 
-                if (is_string($val) && strpos($val, ':')) {
-                    $val = explode(':', $val, 2);
-                }
-
-                $this->app->middleware->controller($val);
+                $this->app->middleware->controller($middleware);
             }
         }
     }

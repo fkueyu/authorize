@@ -3,17 +3,13 @@
 // | 应用设置
 // +----------------------------------------------------------------------
 
-use think\facade\Env;
-
 return [
     // 应用地址
-    'app_host'         => Env::get('app.host', ''),
+    'app_host'         => env('APP_HOST', ''),
     // 应用的命名空间
     'app_namespace'    => '',
     // 是否启用路由
     'with_route'       => true,
-    // 是否启用事件
-    'with_event'       => true,
     // 默认应用
     'default_app'      => 'index',
     // 默认时区

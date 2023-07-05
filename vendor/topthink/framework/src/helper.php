@@ -2,13 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 //------------------------
 // ThinkPHP 助手函数
@@ -58,10 +58,11 @@ if (!function_exists('abort')) {
 if (!function_exists('app')) {
     /**
      * 快速获取容器中的实例 支持依赖注入
-     * @param string $name        类名或标识 默认获取当前应用实例
-     * @param array  $args        参数
-     * @param bool   $newInstance 是否每次创建新的实例
-     * @return object|App
+     * @template T
+     * @param string|class-string<T> $name        类名或标识 默认获取当前应用实例
+     * @param array                  $args        参数
+     * @param bool                   $newInstance 是否每次创建新的实例
+     * @return T|object|App
      */
     function app(string $name = '', array $args = [], bool $newInstance = false)
     {
@@ -99,7 +100,7 @@ if (!function_exists('cache')) {
 
         if ('' === $value) {
             // 获取缓存
-            return 0 === strpos($name, '?') ? Cache::has(substr($name, 1)) : Cache::get($name);
+            return str_starts_with($name, '?') ? Cache::has(substr($name, 1)) : Cache::get($name);
         } elseif (is_null($value)) {
             // 删除缓存
             return Cache::delete($name);
@@ -133,7 +134,7 @@ if (!function_exists('config')) {
             return Config::set($name, $value);
         }
 
-        return 0 === strpos($name, '?') ? Config::has(substr($name, 1)) : Config::get($name, $value);
+        return str_starts_with($name, '?') ? Config::has(substr($name, 1)) : Config::get($name, $value);
     }
 }
 
@@ -149,10 +150,10 @@ if (!function_exists('cookie')) {
     {
         if (is_null($value)) {
             // 删除
-            Cookie::delete($name);
+            Cookie::delete($name, $option ?: []);
         } elseif ('' === $value) {
             // 获取
-            return 0 === strpos($name, '?') ? Cookie::has(substr($name, 1)) : Cookie::get($name);
+            return str_starts_with($name, '?') ? Cookie::has(substr($name, 1)) : Cookie::get($name);
         } else {
             // 设置
             return Cookie::set($name, $value, $option);
@@ -252,7 +253,7 @@ if (!function_exists('input')) {
      */
     function input(string $key = '', $default = null, $filter = '')
     {
-        if (0 === strpos($key, '?')) {
+        if (str_starts_with($key, '?')) {
             $key = substr($key, 1);
             $has = true;
         }
@@ -274,8 +275,8 @@ if (!function_exists('input')) {
         }
 
         return isset($has) ?
-        request()->has($key, $method) :
-        request()->$method($key, $default, $filter);
+            request()->has($key, $method) :
+            request()->$method($key, $default, $filter);
     }
 }
 
@@ -359,7 +360,7 @@ if (!function_exists('parse_name')) {
             return $ucfirst ? ucfirst($name) : lcfirst($name);
         }
 
-        return strtolower(trim(preg_replace("/[A-Z]/", "_\\0", $name), "_"));
+        return strtolower(trim(preg_replace('/[A-Z]/', '_\\0', $name), '_'));
     }
 }
 
@@ -421,7 +422,7 @@ if (!function_exists('session')) {
             Session::delete($name);
         } elseif ('' === $value) {
             // 判断或获取
-            return 0 === strpos($name, '?') ? Session::has(substr($name, 1)) : Session::get($name);
+            return str_starts_with($name, '?') ? Session::has(substr($name, 1)) : Session::get($name);
         } else {
             // 设置
             Session::set($name, $value);
@@ -521,12 +522,12 @@ if (!function_exists('validate')) {
                 $v->rule($validate);
             }
         } else {
-            if (strpos($validate, '.')) {
+            if (str_contains($validate, '.')) {
                 // 支持场景
                 [$validate, $scene] = explode('.', $validate);
             }
 
-            $class = false !== strpos($validate, '\\') ? $validate : app()->parseClass('validate', $validate);
+            $class = str_contains($validate, '\\') ? $validate : app()->parseClass('validate', $validate);
 
             $v = new $class();
 
@@ -632,7 +633,7 @@ if (!function_exists('public_path')) {
      */
     function public_path($path = '')
     {
-        return app()->getRootPath() . ($path ? ltrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR : $path);
+        return app()->getRootPath() . 'public' . DIRECTORY_SEPARATOR . ($path ? ltrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR : $path);
     }
 }
 

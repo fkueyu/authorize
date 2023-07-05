@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK IT ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006-2016 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006-2021 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -26,9 +26,6 @@ use Throwable;
  */
 class Handle
 {
-    /** @var App */
-    protected $app;
-
     protected $ignoreReport = [
         HttpException::class,
         HttpResponseException::class,
@@ -39,9 +36,8 @@ class Handle
 
     protected $isJson = false;
 
-    public function __construct(App $app)
+    public function __construct(protected App $app)
     {
-        $this->app = $app;
     }
 
     /**
@@ -77,7 +73,7 @@ class Handle
 
             try {
                 $this->app->log->record($log, 'error');
-            } catch (Exception $e){}
+            } catch (Exception $e) {}
         }
     }
 
@@ -100,7 +96,7 @@ class Handle
      * @param Throwable $e
      * @return Response
      */
-    public function render($request, Throwable $e): Response
+    public function render(Request $request, Throwable $e): Response
     {
         $this->isJson = $request->isJson();
         if ($e instanceof HttpResponseException) {
@@ -152,11 +148,11 @@ class Handle
     {
         if ($this->app->isDebug()) {
             // 调试模式，获取详细的错误信息
-            $traces = [];
+            $traces        = [];
             $nextException = $exception;
             do {
                 $traces[] = [
-                    'name'    => get_class($nextException),
+                    'name'    => $nextException::class,
                     'file'    => $nextException->getFile(),
                     'line'    => $nextException->getLine(),
                     'code'    => $this->getCode($nextException),
@@ -171,14 +167,12 @@ class Handle
                 'traces'  => $traces,
                 'datas'   => $this->getExtendData($exception),
                 'tables'  => [
-                    'GET Data'              => $this->app->request->get(),
-                    'POST Data'             => $this->app->request->post(),
-                    'Files'                 => $this->app->request->file(),
-                    'Cookies'               => $this->app->request->cookie(),
-                    'Session'               => $this->app->session->all(),
-                    'Server/Request Data'   => $this->app->request->server(),
-                    'Environment Variables' => $this->app->request->env(),
-                    'ThinkPHP Constants'    => $this->getConst(),
+                    'GET Data'            => $this->app->request->get(),
+                    'POST Data'           => $this->app->request->post(),
+                    'Files'               => $this->app->request->file(),
+                    'Cookies'             => $this->app->request->cookie(),
+                    'Session'             => $this->app->exists('session') ? $this->app->session->all() : [],
+                    'Server/Request Data' => $this->app->request->server(),
                 ],
             ];
         } else {
@@ -263,10 +257,10 @@ class Handle
 
         $lang = $this->app->lang;
 
-        if (strpos($message, ':')) {
+        if (str_contains($message, ':')) {
             $name    = strstr($message, ':', true);
             $message = $lang->has($name) ? $lang->get($name) . strstr($message, ':') : $message;
-        } elseif (strpos($message, ',')) {
+        } elseif (str_contains($message, ',')) {
             $name    = strstr($message, ',', true);
             $message = $lang->has($name) ? $lang->get($name) . ':' . substr(strstr($message, ','), 1) : $message;
         } elseif ($lang->has($message)) {

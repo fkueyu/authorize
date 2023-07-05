@@ -11,6 +11,10 @@ class User extends Model
   public function login($username, $password)
   {
     $user = User::where('username', $username)->find();
+    if (empty($user)) {
+      $result = ['code' => -1, 'data' => '', 'msg' => '账号不存在,请重试'];
+      return $result;
+    }
     if (password_verify($password, $user->password_hash)) {
       $this->assistant = new \mylib\Assistant();
       Session::set('id', $user->getAttr('id'));
@@ -29,7 +33,7 @@ class User extends Model
         $result = ['code' => 0, 'data' => '/authorize/personal', 'msg' => '密码强度不足，即将跳转到密码修改页...'];
       }
     } else {
-      $result = ['code' => -1, 'data' => '', 'msg' => '账号或密码错误,请重试'];
+      $result = ['code' => -2, 'data' => '', 'msg' => '密码错误,请重试'];
     }
     return $result;
   }
@@ -53,7 +57,7 @@ class User extends Model
       if (1 == $intensity['code']) {
         $result = $intensity;
       } else {
-        $password_hash = password_hash($value, PASSWORD_ARGON2I);
+        $password_hash = password_hash($value, PASSWORD_BCRYPT);
         $user = User::where('id', $id)->find();
         if (password_verify($opassword, $user->password_hash)) {
           $user->setAttr($field, $password_hash);

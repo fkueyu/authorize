@@ -1,14 +1,6 @@
-layui.use(['form', 'layer', 'layedit'], function () {
+layui.use(function () {
   var form = layui.form
-    , layer = layui.layer
-    , layedit = layui.layedit;
-  //自定义验证规则
-  form.verify({
-    pass: [/(.+){6,12}$/, '密码必须6到12位']
-    , content: function (value) {
-      layedit.sync(editIndex);
-    }
-  });
+    , layer = layui.layer;
   // 后端获取角色列表并允许多选
   $(function () {
     $.ajax({

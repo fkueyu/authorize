@@ -150,6 +150,7 @@ class ContainerTest extends TestCase
         $container->bind('name2', $object);
 
         $container->bind('name3', Taylor::class);
+        $container->bind('name3', Taylor::class);
 
         $container->name4 = $object;
 
@@ -185,7 +186,7 @@ class ContainerTest extends TestCase
         $taylor = $container->make(Taylor::class);
 
         $this->assertInstanceOf(Taylor::class, $taylor);
-        $this->assertAttributeSame('Taylor', 'name', $taylor);
+        $this->assertSame('Taylor', $taylor->name);
     }
 
     public function testGetAndSetInstance()
