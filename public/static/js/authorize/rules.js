@@ -7,22 +7,26 @@ layui.use(function () {
   // 渲染
   var inst = treeTable.render({
     elem: '#ID-treeTable',
-    pid: 'pid',
-    url: '/authorize/getSubRules', // 此处为静态模拟数据，实际使用时需换成真实接口
+    url: '/authorize/getSubRules',
     tree: {
+      customName: {
+        name: 'title'
+      },
       // 异步加载子节点
       async: {
         enable: true,
-        url: '/authorize/getSubRules', // 此处为静态模拟数据，实际使用时需换成真实接口
+        url: '/authorize/getSubRules',
         autoParam: ["pid=id"]
-      }
+      },
+
     },
-    maxHeight: '501px',
+    maxHeight: 'full-163',
     toolbar: '#TPL-treeTable',
+
     cols: [[
       { field: 'id', title: 'ID', width: 55, fixed: 'left' },
-      { field: 'name', title: '名称', width: 160 },
-      { field: 'title', title: '控制器', width: 120 },
+      { field: 'title', title: '名称', width: 160 },
+      { field: 'name', title: '控制器', width: 120 },
       { field: 'pid', title: '父ID', width: 50 },
       { field: 'navid', title: '排序', width: 50 },
       { field: 'condition', title: '条件', width: 120 },
@@ -151,12 +155,12 @@ layui.use(function () {
           type: 1
           , title: '修改规则'
           , area: ['480px', '530px']
-          , content: '<br><form id="mod_menu" class="layui-form" action=""><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">父ID</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="pid" id="pid" readonly="" value="' + result.data.pid + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">名称</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="title" id="title" value="' + result.data.name + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">控制器</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="name" id="name" value="' + result.data.title + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">条件</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="condition" id="condition" value="' + result.data.condition + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">排序规则</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="navid" id="navid" value="' + result.data.navid + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">备注</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="remarks" id="remarks" value ="' + result.data.remarks + '"></div></div><input name="id" id="id" type="hidden" value="' + trData.id + '"></form>' //这里content是一个普通的String
+          , content: '<br><form id="mod_menu" class="layui-form" action=""><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">父ID</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="pid" id="pid" readonly="" value="' + result.data.pid + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">名称</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="title" id="title" value="' + result.data.title + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">控制器</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="name" id="name" value="' + result.data.name + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">条件</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="condition" id="condition" value="' + result.data.condition + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">排序规则</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="navid" id="navid" value="' + result.data.navid + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">备注</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="remarks" id="remarks" value ="' + result.data.remarks + '"></div></div><input name="id" id="id" type="hidden" value="' + trData.id + '"></form>' //这里content是一个普通的String
           , btn: ['提交', '关闭']
           , yes: function () {
             //通过ajax提交数据
             $.post("/authorize/updateRules", $("#mod_menu").serialize(), function (data) {
-              if (result.data.code === 0) {
+              if (data.code === 0) {
                 var newdata = {
                   id: data.id,
                   name: $('#name').val(),
@@ -168,11 +172,7 @@ layui.use(function () {
                   pid: trData.id,
                   navid: $('#navid').val()
                 };
-                treeTable.addNodes(tableId, {
-                  parentIndex: trData["LAY_DATA_INDEX"],
-                  index: -1,
-                  data: newdata
-                });
+                treeTable.updateNode(tableId, obj.index, newdata);
               }
               layer.close(index);
               layer.msg(data.msg, { time: 2000 });

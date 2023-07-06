@@ -29,7 +29,7 @@ class AuthRule extends Model
   public function getSubRules($pid)
   {
     if(empty($pid)) $pid = 0;
-    $result = AuthRule::field('id,title as name,pid,navid,name as title,type,status,condition,remarks,isParent')
+    $result = AuthRule::field('id,title,pid,navid,name,type,status,condition,remarks,isParent')
         ->where('pid', $pid)
         ->order('navid')
         ->select()

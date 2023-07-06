@@ -17,7 +17,7 @@ layui.use(function () {
   table.render({
     elem: '#userlist'
     , id: 'uReload'
-    , height: 'full-220'
+    , maxHeight: 'full-163'
     , method: 'post'
     , url: '/authorize/getUsers' //数据接口
     , page: true //开启分页
@@ -26,7 +26,7 @@ layui.use(function () {
     , cols: [[ //表头
       { field: 'ids', title: '#', width: 50, type: 'numbers', fixed: 'left' }
       , { field: 'name', edit: 'text', title: '姓名', width: 100 }
-      , { field: 'username', title: '账号', width: 120 }
+      , { field: 'username', title: '账号', width: 100 }
       , { field: 'email', edit: 'text', title: '邮箱', width: 200 }
       , { field: 'tel', edit: 'text', title: '电话', width: 120, sort: true }
       , { field: 'department', edit: 'text', title: '部门', width: 160 }

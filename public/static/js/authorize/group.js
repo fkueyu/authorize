@@ -9,7 +9,7 @@ layui.use(function () {
   table.render({
     elem: '#grouplist'
     , id: 'uReload'
-    , height: 'full-220'
+    , maxHeight: 'full-163'
     , method: 'post'
     , url: '/authorize/getGroup' //数据接口
     , page: true //开启分页

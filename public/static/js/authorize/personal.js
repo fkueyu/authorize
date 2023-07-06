@@ -5,7 +5,7 @@ layui.use(function () {
   table.render({
     elem: '#user'
     , id: 'uReload'
-    , height: 'full-180'
+    , maxHeight: 'full-163'
     , method: 'post'
     , url: '/authorize/getPersonal' //数据接口
     , cols: [[ //表头
