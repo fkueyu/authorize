@@ -13,8 +13,8 @@ layui.use(function () {
     , method: 'post'
     , url: '/authorize/getGroup' //数据接口
     , page: true //开启分页
-    , limits: [15, 50, 100]
-    , limit: 15
+    , limits: [30, 50, 100]
+    , limit: 30
     , cols: [[ //表头
       { field: 'ids', title: '#', width: 50, type: 'numbers', fixed: 'left' }
       , { field: 'id', title: 'ID', width: 60 }

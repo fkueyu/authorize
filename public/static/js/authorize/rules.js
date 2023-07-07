@@ -22,7 +22,8 @@ layui.use(function () {
     },
     maxHeight: 'full-163',
     toolbar: '#TPL-treeTable',
-
+    limits: [30, 50, 100],
+    limit: 30,
     cols: [[
       { field: 'id', title: 'ID', width: 55, fixed: 'left' },
       { field: 'title', title: '名称', width: 160 },
@@ -117,7 +118,6 @@ layui.use(function () {
         , content: '<br><form id="new_menu" class="layui-form" action=""><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">名称</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="title" id="title" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">控制器</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="name" id="name" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">条件</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="condition" id="condition" autocomplete="off" value="{status} === 1"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">备注</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="remarks" id="remarks" autocomplete="off"></div></div><input name="pid" id="pid" type="hidden" value="' + trData.id + '"></form>' //这里content是一个普通的String
         , btn: ['提交', '关闭']
         , yes: function () {
-          //通过ajax提交数据
           if ($('#name').val() == '' || $('#title').val() == '') {
             layer.msg('名称和控制器字段不能为空', { time: 2000 });
           } else {
@@ -158,7 +158,6 @@ layui.use(function () {
           , content: '<br><form id="mod_menu" class="layui-form" action=""><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">父ID</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="pid" id="pid" readonly="" value="' + result.data.pid + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">名称</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="title" id="title" value="' + result.data.title + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">控制器</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="name" id="name" value="' + result.data.name + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">条件</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="condition" id="condition" value="' + result.data.condition + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">排序规则</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="navid" id="navid" value="' + result.data.navid + '" autocomplete="off"></div></div><div class="layui-form-item"><label class="layui-form-label" style="width: 60px;">备注</label><div class="layui-inline" style="width: 340px;"><input class="layui-input" name="remarks" id="remarks" value ="' + result.data.remarks + '"></div></div><input name="id" id="id" type="hidden" value="' + trData.id + '"></form>' //这里content是一个普通的String
           , btn: ['提交', '关闭']
           , yes: function () {
-            //通过ajax提交数据
             $.post("/authorize/updateRules", $("#mod_menu").serialize(), function (data) {
               if (data.code === 0) {
                 var newdata = {
