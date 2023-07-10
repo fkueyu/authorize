@@ -122,7 +122,6 @@ CREATE TABLE `fr_lab_user`  (
   `status` int(1) NOT NULL DEFAULT 1 COMMENT '账户状态',
   `update_time` int(11) NOT NULL COMMENT '最后修改时间',
   `create_time` int(11) NOT NULL COMMENT '添加时间',
-  `map_identification` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '地图标识',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `username`(`username`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 207 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;

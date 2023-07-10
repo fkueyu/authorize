@@ -94,7 +94,7 @@ class Authorize
       $user = [
         'name' => input('name'),
         'username' => input('username'),
-        'password_hash' => password_hash(input('password'), PASSWORD_ARGON2I),
+        'password_hash' => password_hash(input('password'), PASSWORD_BCRYPT),
         'email' => input('email'),
         'tel' => input('tel'),
         'position' => input('position'),
@@ -160,7 +160,7 @@ class Authorize
     $value = Request::param('value');
     if ($this->auth->check('user_list', Session::get('id'))) {
       if ('password_hash' == $field) {
-        $value = password_hash($value, PASSWORD_ARGON2I);
+        $value = password_hash($value, PASSWORD_BCRYPT);
       }
       if (1 == $id && 'status' == $field && 1 != $value) {
         return '系统管理员无法禁用';
